@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Vocab Trainer Extension",
+  "version": "1.0.0",
+  "description": "A Chrome extension for vocabulary training",
+  "permissions": ["activeTab", "storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Vocab Trainer"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "icons": {
+    "16": "icon-16.png",
+    "38": "icon-38.png",
+    "128": "icon-128.png"
+  }
+}
