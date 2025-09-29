@@ -1,0 +1,70 @@
+import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
+
+export const DB_NAME = 'MemoraDB';
+export const DB_VERSION = 1;
+export const STORE_NAME = 'words';
+export const INDEX_TIMESTAMP = 'timestamp';
+
+interface MemoraDB extends DBSchema {
+  words: {
+    key: string;
+    value: {
+      word: string;
+      timestamp: string;
+      sourceUrl: string;
+      meaning?: string;
+    };
+    indexes: {
+      timestamp: string;
+    };
+  };
+}
+
+export type WordEntry = MemoraDB['words']['value'];
+
+let cachedDbConnection: IDBPDatabase<MemoraDB>;
+
+export async function getDb() {
+  if (!cachedDbConnection) {
+    cachedDbConnection = await openDB(DB_NAME, DB_VERSION, {
+      upgrade(db) {
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          const store = db.createObjectStore(STORE_NAME, { keyPath: 'word' });
+          store.createIndex(INDEX_TIMESTAMP, 'timestamp');
+        }
+      },
+    });
+  }
+  return cachedDbConnection;
+}
+
+export async function saveWord(word: string, sourceUrl: string, meaning?: string) {
+  const db = await getDb();
+  const normalized = word.toLowerCase().trim();
+  const payload: WordEntry = {
+    word: normalized,
+    timestamp: new Date().toISOString(),
+    sourceUrl: sourceUrl || '',
+    ...(meaning ? { meaning } : {}),
+  };
+  const tx = db.transaction(STORE_NAME, 'readwrite');
+  await tx.store.put(payload);
+  await tx.done;
+}
+
+export async function deleteWord(word: string) {
+  const db = await getDb();
+  const normalized = word.toLowerCase().trim();
+  const tx = db.transaction(STORE_NAME, 'readwrite');
+  await tx.store.delete(normalized);
+  await tx.done;
+}
+
+export async function clearAllWords() {
+  const db = await getDb();
+  const tx = db.transaction(STORE_NAME, 'readwrite');
+  await tx.store.clear();
+  await tx.done;
+}
+
+

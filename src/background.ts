@@ -1,54 +1,4 @@
-import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
-
-interface MemoraDB extends DBSchema {
-  words: {
-    key: number;
-    value: {
-      id?: number;
-      word: string;
-      context: string;
-      timestamp: string;
-      url: string;
-    };
-    indexes: {
-      word: string;
-      timestamp: string;
-    };
-  };
-}
-
-let dbPromise: Promise<IDBPDatabase<MemoraDB>> | null = null;
-
-function getDb(): Promise<IDBPDatabase<MemoraDB>> {
-  if (!dbPromise) {
-    dbPromise = openDB<MemoraDB>('MemoraDB', 1, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains('words')) {
-          const store = db.createObjectStore('words', { keyPath: 'id', autoIncrement: true });
-          store.createIndex('word', 'word');
-          store.createIndex('timestamp', 'timestamp');
-        }
-      },
-    });
-    console.log('IndexedDB opened successfully');
-  }
-  return dbPromise;
-}
-
-async function saveWord(word: string, pageUrl?: string): Promise<void> {
-  const db = await getDb();
-  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-  const currentUrl = tabs[0]?.url || '';
-  const payload = {
-    word: word.toLowerCase().trim(),
-    context: pageUrl || '',
-    timestamp: new Date().toISOString(),
-    url: currentUrl,
-  };
-  const tx = db.transaction('words', 'readwrite');
-  await tx.store.add(payload);
-  await tx.done;
-}
+import { saveWord } from './index-db';
 
 
 chrome.runtime.onInstalled.addListener(async () => {
@@ -68,9 +18,9 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === 'addToMemora' && info.selectionText) {
     try {
       console.log('Attempting to save word:', info.selectionText);
-      await saveWord(info.selectionText, info.pageUrl);
+      const sourceUrl = info.pageUrl ?? tab?.url ?? '';
+      await saveWord(info.selectionText, sourceUrl);
       console.log('Word saved successfully');
-      // Send message to content script to show toast
       if (tab?.id) {
         chrome.tabs.sendMessage(tab.id, {
           action: 'showToast',
