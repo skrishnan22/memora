@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Vocab Trainer Extension",
+  "name": "Memora",
   "version": "1.0.0",
   "description": "A Chrome extension for vocabulary training",
-  "permissions": ["activeTab", "storage"],
+  "permissions": ["activeTab", "storage", "contextMenus"],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Vocab Trainer"
+    "default_title": "Memora"
   },
   "background": {
     "service_worker": "background.js"
