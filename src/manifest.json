@@ -3,7 +3,7 @@
   "name": "Memora",
   "version": "1.0.0",
   "description": "A Chrome extension for vocabulary training",
-  "permissions": ["activeTab", "storage", "contextMenus"],
+  "permissions": ["activeTab", "storage", "contextMenus", "notifications"],
   "action": {
     "default_popup": "popup.html",
     "default_title": "Memora"

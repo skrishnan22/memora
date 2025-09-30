@@ -1,55 +1,7 @@
-function createToast(message: string, isError: boolean = false): HTMLElement {
-  const toast = document.createElement('div');
-  toast.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: ${isError ? '#ff4444' : '#4CAF50'};
-    color: white;
-    padding: 12px 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    z-index: 10000;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    max-width: 300px;
-    word-wrap: break-word;
-    opacity: 0;
-    transform: translateX(100%);
-    transition: all 0.3s ease-in-out;
-  `;
-  
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  
-  setTimeout(() => {
-    toast.style.opacity = '1';
-    toast.style.transform = 'translateX(0)';
-  }, 10);
-  
-  return toast;
-}
+// Toast libraries removed. System notifications are handled by background script.
 
-function showToast(message: string, isError: boolean = false): void {
-  const toast = createToast(message, isError);
-  
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(100%)';
-    setTimeout(() => {
-      if (toast.parentNode) {
-        toast.parentNode.removeChild(toast);
-      }
-    }, 300);
-  }, 3000);
-}
-
-chrome.runtime.onMessage.addListener((message, _sender) => {
-  if (message.action === 'showToast') {
-    showToast(message.message, message.isError || false);
-  }
-  
+chrome.runtime.onMessage.addListener((_message, _sender) => {
+  // No-op: notifications handled in background
 });
 
 let selectionTimeout: number | null = null;

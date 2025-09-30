@@ -1,5 +1,25 @@
 import { saveWord } from './index-db';
 
+const SUCCESS_NOTIFICATION_ID = 'memora-save-success';
+const ERROR_NOTIFICATION_ID = 'memora-save-error';
+
+async function showNotification(notificationId: string, title: string, message: string) {
+  const iconUrl = chrome.runtime.getURL('icon-128.png');
+  try {
+    await chrome.notifications.create(notificationId, {
+      type: 'basic',
+      iconUrl,
+      title,
+      message,
+      priority: 0
+    });
+  } catch (error) {
+    console.error('Failed to show notification', notificationId, error);
+    return;
+  }
+
+}
+
 
 chrome.runtime.onInstalled.addListener(async () => {
   console.log('Extension installed, initializing...');
@@ -17,26 +37,23 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   
   if (info.menuItemId === 'addToMemora' && info.selectionText) {
     try {
-      console.log('Attempting to save word:', info.selectionText);
       const sourceUrl = info.pageUrl ?? tab?.url ?? '';
       await saveWord(info.selectionText, sourceUrl);
       console.log('Word saved successfully');
-      if (tab?.id) {
-        chrome.tabs.sendMessage(tab.id, {
-          action: 'showToast',
-          message: `"${info.selectionText}" added to Memora!`
-        });
-      }
+
+      await showNotification(
+        SUCCESS_NOTIFICATION_ID,
+        'Memora',
+        `"${info.selectionText}" added to Memora!`
+      );
     } catch (error) {
       console.error('Error saving word:', error);
       
-      if (tab?.id) {
-        chrome.tabs.sendMessage(tab.id, {
-          action: 'showToast',
-          message: 'Error saving word to Memora',
-          isError: true
-        });
-      }
+      await showNotification(
+        ERROR_NOTIFICATION_ID,
+        'Memora — Error',
+        'Error saving word to Memora'
+      );
     }
   }
 });
