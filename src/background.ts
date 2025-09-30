@@ -6,7 +6,8 @@ const ERROR_NOTIFICATION_ID = 'memora-save-error';
 async function showNotification(notificationId: string, title: string, message: string) {
   const iconUrl = chrome.runtime.getURL('icon-128.png');
   try {
-    await chrome.notifications.create(notificationId, {
+    // chrome notifications will not be shown if the same notificationId is used multiple times
+    await chrome.notifications.create(`${notificationId}-${Date.now()}`, {
       type: 'basic',
       iconUrl,
       title,
