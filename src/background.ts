@@ -113,6 +113,15 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   if (info.menuItemId === "addToMemora" && info.selectionText) {
     try {
+      const activeTabId = tab?.id;
+      if (activeTabId) {
+        chrome.tabs.sendMessage(activeTabId, {
+          type: "MEMORA_MODAL",
+          action: "loading",
+          word: info.selectionText,
+        });
+      }
+
       const sourceUrl = info.pageUrl ?? tab?.url ?? "";
       const meanings = await fetchWordMeanings(info.selectionText);
       await saveWord(info.selectionText, sourceUrl, meanings);
@@ -123,6 +132,15 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         "Memora",
         `"${info.selectionText}" added to Memora!`
       );
+
+      if (activeTabId) {
+        chrome.tabs.sendMessage(activeTabId, {
+          type: "MEMORA_MODAL",
+          action: "success",
+          word: info.selectionText,
+          meanings,
+        });
+      }
     } catch (error) {
       console.error("Error saving word:", error);
 
@@ -131,6 +149,15 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         "Memora — Error",
         "Error saving word to Memora"
       );
+
+      if (tab?.id) {
+        chrome.tabs.sendMessage(tab.id, {
+          type: "MEMORA_MODAL",
+          action: "error",
+          word: info.selectionText,
+          error: "Failed to fetch or save meaning.",
+        });
+      }
     }
   }
 });
