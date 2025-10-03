@@ -1,3 +1,5 @@
+import modalCss from "./modal.css?raw";
+
 type ModalAction = "loading" | "success" | "error" | "hide";
 
 interface WordMeaning {
@@ -18,6 +20,10 @@ class MemoraModal {
   private shadowHost: HTMLElement | null = null;
   private container: HTMLElement | null = null;
   private content: HTMLElement | null = null;
+  // Intentionally omitted any member for close button to avoid unused warnings
+  private tmplLoading: HTMLTemplateElement | null = null;
+  private tmplMeaningItem: HTMLTemplateElement | null = null;
+  private tmplError: HTMLTemplateElement | null = null;
 
   initialize() {
     if (this.shadowHost) return;
@@ -28,64 +34,67 @@ class MemoraModal {
     host.style.position = "fixed";
     host.style.inset = "0";
     host.style.zIndex = "2147483647"; // above everything
-    host.style.pointerEvents = "none"; // don't block page when hidden
+    host.style.pointerEvents = "none"; // host must never intercept clicks
     document.documentElement.appendChild(host);
 
     const shadow = host.attachShadow({ mode: "open" });
+    // Adopt stylesheet
+    if ((document as any).adoptedStyleSheets) {
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(modalCss);
+      (shadow as any).adoptedStyleSheets = [sheet];
+    } else {
+      const style = document.createElement("style");
+      style.textContent = modalCss;
+      shadow.appendChild(style);
+    }
 
-    const style = document.createElement("style");
-    style.textContent = `
-      :host { all: initial; }
-      .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; }
-      .panel { width: min(520px, calc(100vw - 32px)); max-height: min(80vh, 720px); overflow: auto; background: #fff; color: #111; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
-      .header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #eee; }
-      .title { margin: 0; font-size: 16px; font-weight: 600; }
-      .close { appearance: none; border: none; background: transparent; font-size: 18px; cursor: pointer; line-height: 1; padding: 6px; border-radius: 8px; }
-      .close:hover { background: #f5f5f5; }
-      .body { padding: 14px 16px; }
-      .loading { display: flex; align-items: center; gap: 10px; color: #333; }
-      .spinner { width: 16px; height: 16px; border: 2px solid #ddd; border-top-color: #666; border-radius: 50%; animation: spin 1s linear infinite; }
-      @keyframes spin { to { transform: rotate(360deg); } }
-      .meaning { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
-      .badge { display: inline-block; font-size: 12px; color: #555; background: #f4f4f5; border-radius: 999px; padding: 2px 8px; margin-bottom: 6px; }
-      .definition { margin: 0 0 6px 0; }
-      .example { margin: 0; color: #555; font-style: italic; }
-      .error { color: #b00020; }
+    // Template for markup
+    const template = document.createElement("template");
+    template.innerHTML = `
+      <div class="overlay">
+        <div class="panel">
+          <div class="header">
+            <h3 class="title">Memora</h3>
+            <button class="close" aria-label="Close">×</button>
+          </div>
+          <div class="body"></div>
+        </div>
+      </div>
     `;
+    shadow.appendChild(template.content.cloneNode(true));
 
-    const overlay = document.createElement("div");
-    overlay.className = "overlay";
+    const overlay = shadow.querySelector(".overlay") as HTMLElement;
+    const body = shadow.querySelector(".body") as HTMLElement;
+    const close = shadow.querySelector(".close") as HTMLButtonElement;
+
     overlay.addEventListener("click", (e) => {
       if (e.target === overlay) this.hide();
     });
-
-    const panel = document.createElement("div");
-    panel.className = "panel";
-
-    const header = document.createElement("div");
-    header.className = "header";
-
-    const title = document.createElement("h3");
-    title.className = "title";
-    title.textContent = "Memora";
-
-    const close = document.createElement("button");
-    close.className = "close";
-    close.setAttribute("aria-label", "Close");
-    close.textContent = "×";
     close.addEventListener("click", () => this.hide());
 
-    const body = document.createElement("div");
-    body.className = "body";
+    // Define reusable templates
+    this.tmplLoading = document.createElement("template");
+    this.tmplLoading.innerHTML = `
+      <div class="loading">
+        <div class="spinner"></div>
+        <div class="text"></div>
+      </div>
+    `;
 
-    header.appendChild(title);
-    header.appendChild(close);
-    panel.appendChild(header);
-    panel.appendChild(body);
-    overlay.appendChild(panel);
+    this.tmplMeaningItem = document.createElement("template");
+    this.tmplMeaningItem.innerHTML = `
+      <div class="meaning">
+        <div class="badge"></div>
+        <p class="definition"></p>
+        <p class="example"></p>
+      </div>
+    `;
 
-    shadow.appendChild(style);
-    shadow.appendChild(overlay);
+    this.tmplError = document.createElement("template");
+    this.tmplError.innerHTML = `
+      <div class="error"></div>
+    `;
 
     this.shadowHost = host;
     this.container = overlay;
@@ -100,30 +109,28 @@ class MemoraModal {
 
   showLoading(word: string) {
     this.initialize();
-    if (!this.content || !this.container) return;
-    if (this.shadowHost) this.shadowHost.style.pointerEvents = "auto";
+    if (!this.content || !this.container || !this.tmplLoading) return;
+    // enable interaction only within overlay
     this.container.style.display = "flex";
+    this.container.style.pointerEvents = "auto";
     this.content.innerHTML = "";
-    const row = document.createElement("div");
-    row.className = "loading";
-    const spinner = document.createElement("div");
-    spinner.className = "spinner";
-    const text = document.createElement("div");
-    text.textContent = `Looking up "${word}"...`;
-    row.appendChild(spinner);
-    row.appendChild(text);
-    this.content.appendChild(row);
+    const frag = this.tmplLoading.content.cloneNode(true) as DocumentFragment;
+    const textEl = frag.querySelector(".text");
+    if (textEl) textEl.textContent = `Looking up "${this.escape(word)}"...`;
+    this.content.appendChild(frag);
   }
 
   showSuccess(word: string, meanings: WordMeaning[]) {
     this.initialize();
-    if (!this.content || !this.container) return;
-    if (this.shadowHost) this.shadowHost.style.pointerEvents = "auto";
+    if (!this.content || !this.container || !this.tmplMeaningItem) return;
     this.container.style.display = "flex";
+    this.container.style.pointerEvents = "auto";
     this.content.innerHTML = "";
 
     const heading = document.createElement("div");
-    heading.innerHTML = `<strong>${this.escape(word)}</strong>`;
+    const strong = document.createElement("strong");
+    strong.textContent = word;
+    heading.appendChild(strong);
     this.content.appendChild(heading);
 
     if (!meanings?.length) {
@@ -134,47 +141,50 @@ class MemoraModal {
     }
 
     meanings.slice(0, 5).forEach((m) => {
-      const item = document.createElement("div");
-      item.className = "meaning";
+      const frag = this.tmplMeaningItem!.content.cloneNode(
+        true
+      ) as DocumentFragment;
+      const badge = frag.querySelector(".badge");
+      const def = frag.querySelector(".definition");
+      const ex = frag.querySelector(".example");
 
-      const badge = document.createElement("div");
-      badge.className = "badge";
-      badge.textContent = m.partOfSpeech || "meaning";
-
-      const def = document.createElement("p");
-      def.className = "definition";
-      def.textContent = m.definition;
-
-      item.appendChild(badge);
-      item.appendChild(def);
-      if (m.example) {
-        const ex = document.createElement("p");
-        ex.className = "example";
-        ex.textContent = `“${m.example}”`;
-        item.appendChild(ex);
+      if (badge) badge.textContent = m.partOfSpeech || "meaning";
+      if (def) def.textContent = m.definition;
+      if (ex) {
+        if (m.example) {
+          ex.textContent = `“${m.example}”`;
+        } else {
+          ex.remove();
+        }
       }
-      this.content!.appendChild(item);
+
+      this.content!.appendChild(frag);
     });
   }
 
   showError(word: string, error: string) {
     this.initialize();
-    if (!this.content || !this.container) return;
-    if (this.shadowHost) this.shadowHost.style.pointerEvents = "auto";
+    if (!this.content || !this.container || !this.tmplError) return;
     this.container.style.display = "flex";
+    this.container.style.pointerEvents = "auto";
     this.content.innerHTML = "";
     const title = document.createElement("div");
-    title.innerHTML = `<strong>${this.escape(word)}</strong>`;
-    const err = document.createElement("div");
-    err.className = "error";
-    err.textContent = error || "Something went wrong.";
+    const strong = document.createElement("strong");
+    strong.textContent = word;
+    title.appendChild(strong);
+    const frag = this.tmplError.content.cloneNode(true) as DocumentFragment;
+    const errEl = frag.querySelector(".error") as HTMLElement | null;
+    if (errEl) errEl.textContent = error || "Something went wrong.";
     this.content.appendChild(title);
-    this.content.appendChild(err);
+    this.content.appendChild(frag);
   }
 
   hide() {
-    if (this.container) this.container.style.display = "none";
-    if (this.shadowHost) this.shadowHost.style.pointerEvents = "none";
+    if (this.container) {
+      this.container.style.display = "none";
+      this.container.style.pointerEvents = "none";
+    }
+    // host remains pointer-events: none always
   }
 
   private escape(input: string) {
