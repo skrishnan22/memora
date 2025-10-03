@@ -16,7 +16,6 @@ interface ModalMessage {
 
 class MemoraModal {
   private shadowHost: HTMLElement | null = null;
-  private shadowRootRef: ShadowRoot | null = null;
   private container: HTMLElement | null = null;
   private content: HTMLElement | null = null;
 
@@ -29,6 +28,7 @@ class MemoraModal {
     host.style.position = "fixed";
     host.style.inset = "0";
     host.style.zIndex = "2147483647"; // above everything
+    host.style.pointerEvents = "none"; // don't block page when hidden
     document.documentElement.appendChild(host);
 
     const shadow = host.attachShadow({ mode: "open" });
@@ -88,7 +88,6 @@ class MemoraModal {
     shadow.appendChild(overlay);
 
     this.shadowHost = host;
-    this.shadowRootRef = shadow;
     this.container = overlay;
     this.content = body;
 
@@ -102,6 +101,7 @@ class MemoraModal {
   showLoading(word: string) {
     this.initialize();
     if (!this.content || !this.container) return;
+    if (this.shadowHost) this.shadowHost.style.pointerEvents = "auto";
     this.container.style.display = "flex";
     this.content.innerHTML = "";
     const row = document.createElement("div");
@@ -118,6 +118,7 @@ class MemoraModal {
   showSuccess(word: string, meanings: WordMeaning[]) {
     this.initialize();
     if (!this.content || !this.container) return;
+    if (this.shadowHost) this.shadowHost.style.pointerEvents = "auto";
     this.container.style.display = "flex";
     this.content.innerHTML = "";
 
@@ -159,6 +160,7 @@ class MemoraModal {
   showError(word: string, error: string) {
     this.initialize();
     if (!this.content || !this.container) return;
+    if (this.shadowHost) this.shadowHost.style.pointerEvents = "auto";
     this.container.style.display = "flex";
     this.content.innerHTML = "";
     const title = document.createElement("div");
@@ -172,6 +174,7 @@ class MemoraModal {
 
   hide() {
     if (this.container) this.container.style.display = "none";
+    if (this.shadowHost) this.shadowHost.style.pointerEvents = "none";
   }
 
   private escape(input: string) {
