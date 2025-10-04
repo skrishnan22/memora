@@ -1,5 +1,3 @@
-import modalCss from "./modal.css?raw";
-
 type ModalAction = "loading" | "success" | "error" | "hide";
 
 interface WordMeaning {
@@ -16,89 +14,62 @@ interface ModalMessage {
   error?: string;
 }
 
-class MemoraModal {
-  private shadowHost: HTMLElement | null = null;
-  private container: HTMLElement | null = null;
+class MemoraDialog {
+  private dialog: HTMLDialogElement | null = null;
   private content: HTMLElement | null = null;
-  // Intentionally omitted any member for close button to avoid unused warnings
-  private tmplLoading: HTMLTemplateElement | null = null;
-  private tmplMeaningItem: HTMLTemplateElement | null = null;
-  private tmplError: HTMLTemplateElement | null = null;
 
   initialize() {
-    if (this.shadowHost) return;
+    if (this.dialog) return;
 
-    const host = document.createElement("div");
-    host.setAttribute("id", "memora-modal-host");
-    host.style.all = "initial";
-    host.style.position = "fixed";
-    host.style.inset = "0";
-    host.style.zIndex = "2147483647"; // above everything
-    host.style.pointerEvents = "none"; // host must never intercept clicks
-    document.documentElement.appendChild(host);
+    const dialog = document.createElement("dialog");
+    dialog.setAttribute("id", "memora-dialog");
+    dialog.style.cssText = `
+      position: fixed;
+      inset: 0;
+      width: min(520px, calc(100vw - 32px));
+      max-height: min(80vh, 720px);
+      margin: auto;
+      padding: 0;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      background: white;
+      color: #111;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial;
+    `;
 
-    const shadow = host.attachShadow({ mode: "open" });
-    // Adopt stylesheet
-    if ((document as any).adoptedStyleSheets) {
-      const sheet = new CSSStyleSheet();
-      sheet.replaceSync(modalCss);
-      (shadow as any).adoptedStyleSheets = [sheet];
-    } else {
-      const style = document.createElement("style");
-      style.textContent = modalCss;
-      shadow.appendChild(style);
-    }
-
-    // Template for markup
-    const template = document.createElement("template");
-    template.innerHTML = `
-      <div class="overlay">
-        <div class="panel">
-          <div class="header">
-            <h3 class="title">Memora</h3>
-            <button class="close" aria-label="Close">×</button>
-          </div>
-          <div class="body"></div>
+    dialog.innerHTML = `
+      <div style="display: flex; flex-direction: column; height: 100%;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #eee;">
+          <h3 style="margin: 0; font-size: 16px; font-weight: 600;">Memora</h3>
+          <button class="close-btn" style="appearance: none; border: none; background: transparent; font-size: 18px; cursor: pointer; line-height: 1; padding: 6px; border-radius: 8px;">×</button>
         </div>
+        <div class="dialog-body" style="padding: 14px 16px; flex: 1; overflow-y: auto;"></div>
       </div>
     `;
-    shadow.appendChild(template.content.cloneNode(true));
 
-    const overlay = shadow.querySelector(".overlay") as HTMLElement;
-    const body = shadow.querySelector(".body") as HTMLElement;
-    const close = shadow.querySelector(".close") as HTMLButtonElement;
+    // Style the backdrop
+    const style = document.createElement("style");
+    style.textContent = `
+      dialog::backdrop {
+        background: rgba(0,0,0,0.35);
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
 
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) this.hide();
+    const closeBtn = dialog.querySelector(".close-btn") as HTMLButtonElement;
+    closeBtn.addEventListener("click", () => this.hide());
+
+    dialog.addEventListener("click", (e) => {
+      if (e.target === dialog) this.hide();
     });
-    close.addEventListener("click", () => this.hide());
 
-    // Define reusable templates
-    this.tmplLoading = document.createElement("template");
-    this.tmplLoading.innerHTML = `
-      <div class="loading">
-        <div class="spinner"></div>
-        <div class="text"></div>
-      </div>
-    `;
-
-    this.tmplMeaningItem = document.createElement("template");
-    this.tmplMeaningItem.innerHTML = `
-      <div class="meaning">
-        <div class="badge"></div>
-        <p class="definition"></p>
-        <p class="example"></p>
-      </div>
-    `;
-
-    this.tmplError = document.createElement("template");
-    this.tmplError.innerHTML = `
-      <div class="error"></div>
-    `;
-
-    this.shadowHost = host;
-    this.container = overlay;
-    this.content = body;
+    document.documentElement.appendChild(dialog);
+    this.dialog = dialog;
+    this.content = dialog.querySelector(".dialog-body") as HTMLElement;
 
     document.addEventListener("keydown", this.handleEsc, true);
   }
@@ -109,82 +80,66 @@ class MemoraModal {
 
   showLoading(word: string) {
     this.initialize();
-    if (!this.content || !this.container || !this.tmplLoading) return;
-    // enable interaction only within overlay
-    this.container.style.display = "flex";
-    this.container.style.pointerEvents = "auto";
-    this.content.innerHTML = "";
-    const frag = this.tmplLoading.content.cloneNode(true) as DocumentFragment;
-    const textEl = frag.querySelector(".text");
-    if (textEl) textEl.textContent = `Looking up "${this.escape(word)}"...`;
-    this.content.appendChild(frag);
+    if (!this.content || !this.dialog) return;
+
+    this.content.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 10px; color: #333;">
+        <div style="width: 16px; height: 16px; border: 2px solid #ddd; border-top-color: #666; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <div>Looking up "${this.escape(word)}"...</div>
+      </div>
+    `;
+    this.dialog.showModal();
   }
 
   showSuccess(word: string, meanings: WordMeaning[]) {
     this.initialize();
-    if (!this.content || !this.container || !this.tmplMeaningItem) return;
-    this.container.style.display = "flex";
-    this.container.style.pointerEvents = "auto";
-    this.content.innerHTML = "";
+    if (!this.content || !this.dialog) return;
 
-    const heading = document.createElement("div");
-    const strong = document.createElement("strong");
-    strong.textContent = word;
-    heading.appendChild(strong);
-    this.content.appendChild(heading);
+    let html = `<div><strong>${this.escape(word)}</strong></div>`;
 
     if (!meanings?.length) {
-      const empty = document.createElement("div");
-      empty.textContent = "No definitions found.";
-      this.content.appendChild(empty);
-      return;
+      html += "<div>No definitions found.</div>";
+    } else {
+      meanings.slice(0, 5).forEach((m) => {
+        html += `
+          <div style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+            <div style="display: inline-block; font-size: 12px; color: #555; background: #f4f4f5; border-radius: 999px; padding: 2px 8px; margin-bottom: 6px;">${this.escape(
+              m.partOfSpeech || "meaning"
+            )}</div>
+            <p style="margin: 0 0 6px 0;">${this.escape(m.definition)}</p>
+            ${
+              m.example
+                ? `<p style="margin: 0; color: #555; font-style: italic;">"${this.escape(
+                    m.example
+                  )}"</p>`
+                : ""
+            }
+          </div>
+        `;
+      });
     }
 
-    meanings.slice(0, 5).forEach((m) => {
-      const frag = this.tmplMeaningItem!.content.cloneNode(
-        true
-      ) as DocumentFragment;
-      const badge = frag.querySelector(".badge");
-      const def = frag.querySelector(".definition");
-      const ex = frag.querySelector(".example");
-
-      if (badge) badge.textContent = m.partOfSpeech || "meaning";
-      if (def) def.textContent = m.definition;
-      if (ex) {
-        if (m.example) {
-          ex.textContent = `“${m.example}”`;
-        } else {
-          ex.remove();
-        }
-      }
-
-      this.content!.appendChild(frag);
-    });
+    this.content.innerHTML = html;
+    this.dialog.showModal();
   }
 
   showError(word: string, error: string) {
     this.initialize();
-    if (!this.content || !this.container || !this.tmplError) return;
-    this.container.style.display = "flex";
-    this.container.style.pointerEvents = "auto";
-    this.content.innerHTML = "";
-    const title = document.createElement("div");
-    const strong = document.createElement("strong");
-    strong.textContent = word;
-    title.appendChild(strong);
-    const frag = this.tmplError.content.cloneNode(true) as DocumentFragment;
-    const errEl = frag.querySelector(".error") as HTMLElement | null;
-    if (errEl) errEl.textContent = error || "Something went wrong.";
-    this.content.appendChild(title);
-    this.content.appendChild(frag);
+    if (!this.content || !this.dialog) return;
+
+    this.content.innerHTML = `
+      <div><strong>${this.escape(word)}</strong></div>
+      <div style="color: #b00020;">${this.escape(
+        error || "Something went wrong."
+      )}</div>
+    `;
+    this.dialog.showModal();
   }
 
   hide() {
-    if (this.container) {
-      this.container.style.display = "none";
-      this.container.style.pointerEvents = "none";
+    if (this.dialog) {
+      this.dialog.close();
     }
-    // host remains pointer-events: none always
   }
 
   private escape(input: string) {
@@ -194,21 +149,21 @@ class MemoraModal {
   }
 }
 
-const modal = new MemoraModal();
+const dialog = new MemoraDialog();
 
 chrome.runtime.onMessage.addListener((message: ModalMessage) => {
   if (!message || message.type !== "MEMORA_MODAL") return;
   if (message.action === "loading" && message.word) {
-    modal.showLoading(message.word);
+    dialog.showLoading(message.word);
   } else if (message.action === "success" && message.word) {
-    modal.showSuccess(message.word, message.meanings || []);
+    dialog.showSuccess(message.word, message.meanings || []);
   } else if (message.action === "error" && message.word) {
-    modal.showError(
+    dialog.showError(
       message.word,
       message.error || "Error fetching definition."
     );
   } else if (message.action === "hide") {
-    modal.hide();
+    dialog.hide();
   }
 });
 
