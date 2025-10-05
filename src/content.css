@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom animations */
+@keyframes dialogSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer components {
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    animation: backdropFadeIn 0.3s ease-out;
+  }
+
+  .memora-dialog {
+    animation: dialogSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .memora-slide-in {
+    animation: slideInUp 0.4s ease-out;
+    animation-fill-mode: both;
+  }
+
+  .animate-delay-100 {
+    animation-delay: 0.1s;
+  }
+  .animate-delay-200 {
+    animation-delay: 0.15s;
+  }
+  .animate-delay-300 {
+    animation-delay: 0.2s;
+  }
+  .animate-delay-400 {
+    animation-delay: 0.25s;
+  }
+  .animate-delay-500 {
+    animation-delay: 0.3s;
+  }
+  
+  /* Custom border widths */
+  .border-3 {
+    border-width: 3px;
+  }
+  
+  /* Custom scrollbar styles */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-track-slate-100::-webkit-scrollbar-track {
+    background-color: #f1f5f9;
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thumb-slate-300::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+  }
+  
+  .scrollbar-thumb-slate-300:hover::-webkit-scrollbar-thumb {
+    background-color: #94a3b8;
+  }
+  
+  /* Better text rendering */
+  .memora-dialog {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  
+  /* Smooth hover transition for definition cards */
+  .group {
+    transform-origin: center;
+  }
+  
+  /* Improve number badge appearance */
+  .group > div:first-child {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  
+  .group:hover > div:first-child {
+    transform: scale(1.1) rotate(5deg);
+  }
+}
+
