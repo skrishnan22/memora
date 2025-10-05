@@ -26,28 +26,41 @@ class MemoraDialog {
     const dialog = document.createElement("dialog");
     dialog.setAttribute("id", "memora-dialog");
     dialog.className =
-      "memora-dialog fixed inset-0 w-[min(560px,calc(100vw-40px))] max-h-[min(85vh,800px)] m-auto p-0 border-none rounded-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(255,255,255,0.1)] bg-gradient-to-br from-white to-slate-50 text-slate-800 font-sans backdrop:backdrop-blur-sm";
+      "memora-dialog fixed inset-0 w-[min(520px,calc(100vw-40px))] max-h-[min(80vh,760px)] m-auto p-0 rounded-2xl border border-emerald-200/60 bg-emerald-50 text-slate-900 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.08)]";
 
     dialog.innerHTML = `
       <div class="flex flex-col h-full relative">
-        <!-- Header with gradient background -->
-        <div class="flex items-center justify-between px-7 pt-6 pb-5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-t-3xl relative">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
-              <span class="text-white text-base font-semibold">📚</span>
+        <!-- App bar with green gradient and wave divider -->
+        <div class="relative">
+          <div class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-emerald-700 via-emerald-600 to-lime-600 text-white rounded-t-2xl">
+            <div class="w-8 h-8"></div>
+            <div class="flex-1 text-center">
+              <span class="text-xs font-semibold tracking-wide uppercase text-white/70">Memora</span>
             </div>
-            <h3 class="m-0 text-xl font-bold text-white tracking-tight">Memora</h3>
+            <div class="flex items-center gap-1.5">
+              <button class="fav-btn appearance-none border-none cursor-pointer rounded-md w-8 h-8 flex items-center justify-center text-white/80 hover:text-yellow-300 transition-colors" title="Favorite">☆</button>
+              <button class="close-btn appearance-none border-none cursor-pointer rounded-md w-8 h-8 flex items-center justify-center text-white/80 hover:text-white" title="Close">×</button>
+            </div>
           </div>
-          <button class="close-btn appearance-none border-none bg-white/15 text-white text-xl cursor-pointer leading-none p-2 rounded-xl backdrop-blur-md transition-all duration-200 w-9 h-9 flex items-center justify-center hover:bg-white/25 hover:scale-105 active:scale-95">×</button>
+          <!-- Wave divider matching container background -->
+          <svg class="block w-full h-6 text-emerald-50" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,0 V28 Q300,60 600,28 T1200,28 V0 Z" fill="currentColor"></path>
+          </svg>
         </div>
-        
-        <!-- Content area -->
-        <div class="dialog-body p-7 flex-1 overflow-y-auto bg-white rounded-b-3xl scrollbar-thin scrollbar-track-slate-100 scrollbar-thumb-slate-300 hover:scrollbar-thumb-slate-400"></div>
+        <div class="dialog-body p-0 flex-1 overflow-y-auto scrollbar-thin scrollbar-track-slate-100 scrollbar-thumb-slate-300 hover:scrollbar-thumb-slate-400"></div>
       </div>
     `;
 
+    const favBtn = dialog.querySelector(".fav-btn") as HTMLButtonElement;
+    if (favBtn) {
+      favBtn.addEventListener("click", () => {
+        favBtn.classList.toggle("text-yellow-300");
+      });
+    }
     const closeBtn = dialog.querySelector(".close-btn") as HTMLButtonElement;
-    closeBtn.addEventListener("click", () => this.hide());
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => this.hide());
+    }
 
     dialog.addEventListener("click", (e) => {
       if (e.target === dialog) this.hide();
@@ -69,19 +82,13 @@ class MemoraDialog {
     if (!this.content || !this.dialog) return;
 
     this.content.innerHTML = `
-      <div class="flex flex-col items-center gap-5 py-10 px-5 text-center memora-slide-in">
-        <div class="w-12 h-12 border-3 border-slate-200 border-t-indigo-500 rounded-full animate-spin relative">
-          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full animate-pulse"></div>
-        </div>
-        <div class="text-lg font-semibold text-slate-600 leading-normal">
-          Looking up
-        </div>
-        <div class="text-2xl font-bold text-slate-800 bg-gradient-to-br from-indigo-500 to-purple-600 bg-clip-text text-transparent tracking-tight">
-          "${this.escape(word)}"
-        </div>
-        <div class="text-sm text-slate-500 opacity-80">
-          Please wait while we fetch the definition...
-        </div>
+      <div class="flex flex-col items-center gap-4 py-10 px-5 text-center memora-slide-in">
+        <div class="w-10 h-10 border-3 border-emerald-200 border-t-emerald-700 rounded-full animate-spin"></div>
+        <div class="text-base font-medium text-slate-700 leading-normal">Looking up</div>
+        <div class="text-2xl font-bold text-slate-900 tracking-tight">“${this.escape(
+          word
+        )}”</div>
+        <div class="text-sm text-slate-500">Fetching definition…</div>
       </div>
     `;
     this.dialog.showModal();
@@ -93,20 +100,20 @@ class MemoraDialog {
 
     let html = `
       <div class="memora-slide-in">
-        <!-- Word header with better visual hierarchy -->
-        <div class="mb-7">
-          <div class="flex items-baseline gap-3 mb-3">
-            <h2 class="text-[2.5rem] font-black bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-500 bg-clip-text text-transparent tracking-tight leading-none m-0">
-              ${this.escape(word)}
-            </h2>
-            <span class="text-sm font-semibold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">
-              ${meanings?.length || 0} ${
-      meanings?.length !== 1 ? "meanings" : "meaning"
-    }
-            </span>
+        <div class="px-6 pt-6 pb-3">
+          <div class="flex items-center gap-3 mb-1">
+            <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs">Aa</div>
+            <h2 class="text-[2.25rem] md:text-[2.5rem] font-extrabold tracking-tight leading-none m-0 text-slate-900">${this.escape(
+              word
+            )}</h2>
           </div>
-          <div class="h-1 w-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"></div>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] font-medium text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">${
+              meanings?.length || 0
+            } ${meanings?.length !== 1 ? "meanings" : "meaning"}</span>
+          </div>
         </div>
+        
     `;
 
     if (!meanings?.length) {
@@ -118,56 +125,34 @@ class MemoraDialog {
         </div>
       `;
     } else {
-      html += `<div class="flex flex-col gap-4">`;
+      html += `<div class="flex flex-col gap-1.5 p-6">`;
 
       meanings.slice(0, 5).forEach((m, index) => {
         const animationDelay = index > 0 ? `animate-delay-${index}00` : "";
-        const partOfSpeechIcon = this.getPartOfSpeechIcon(m.partOfSpeech);
 
         html += `
-          <div class="group relative bg-white rounded-2xl border-2 border-slate-100 hover:border-indigo-200 shadow-sm hover:shadow-md memora-slide-in ${animationDelay} transition-all duration-300 overflow-hidden">
-            <!-- Number badge -->
-            <div class="absolute -top-1 -left-1 w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md z-10">
-              ${index + 1}
-            </div>
-            
-            <div class="pt-6 px-6 pb-5">
-              <!-- Part of speech header -->
-              <div class="flex items-center gap-2 mb-4">
-                <span class="text-lg">${partOfSpeechIcon}</span>
-                <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest">
-                  ${this.escape(m.partOfSpeech || "meaning")}
-                </span>
-              </div>
-              
-              <!-- Definition -->
-              <p class="m-0 text-[15px] leading-relaxed text-slate-700 font-normal mb-0">
-                ${this.escape(m.definition)}
-              </p>
-            </div>
-            
-            ${
-              m.example
-                ? `
-            <!-- Example section with improved design -->
-            <div class="px-6 pb-5 pt-0">
-              <div class="relative bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
-                <!-- Quote icon -->
-                <div class="absolute -top-2 left-4 bg-white px-2 border border-indigo-100 rounded-md">
-                  <span class="text-indigo-400 text-xs font-bold">💬</span>
-                </div>
-                <div class="flex gap-2 items-start mt-1">
-                  <span class="text-indigo-400/40 text-2xl leading-none font-serif mt-[-4px]">"</span>
-                  <p class="m-0 text-slate-600 text-sm leading-relaxed flex-1 pt-1">
-                    ${this.escape(m.example)}
-                  </p>
-                  <span class="text-indigo-400/40 text-2xl leading-none font-serif self-end mb-[-4px]">"</span>
+          <div class="group relative bg-white rounded-lg memora-slide-in ${animationDelay}">
+            <div class="py-4 px-5">
+              <div class="flex items-start gap-3">
+                <div class="flex-1">
+                  <div class="mb-1">
+                    <span class="inline-block text-[10px] font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">${this.escape(
+                      m.partOfSpeech || "meaning"
+                    )}</span>
+                  </div>
+                  <p class="m-0 text-[15px] leading-relaxed text-slate-800">${this.escape(
+                    m.definition
+                  )}</p>
+                  ${
+                    m.example
+                      ? `<div class=\"mt-2 p-2 rounded-md bg-slate-50 border border-slate-200\"><p class=\"m-0 text-[13px] leading-relaxed text-slate-600 italic\">${this.escape(
+                          m.example
+                        )}</p></div>`
+                      : ""
+                  }
                 </div>
               </div>
             </div>
-            `
-                : ""
-            }
           </div>
         `;
       });
@@ -177,9 +162,7 @@ class MemoraDialog {
       // Add footer note if there are more than 5 meanings
       if (meanings.length > 5) {
         html += `
-          <div class="mt-6 text-center text-sm text-slate-400">
-            Showing 5 of ${meanings.length} definitions
-          </div>
+          <div class="px-6 py-3 text-center text-xs text-slate-500">Showing 5 of ${meanings.length} definitions</div>
         `;
       }
     }
@@ -189,21 +172,7 @@ class MemoraDialog {
     this.dialog.showModal();
   }
 
-  private getPartOfSpeechIcon(partOfSpeech: string): string {
-    const pos = partOfSpeech?.toLowerCase() || "";
-    const iconMap: Record<string, string> = {
-      noun: "📦",
-      verb: "⚡",
-      adjective: "🎨",
-      adverb: "🔄",
-      pronoun: "👤",
-      preposition: "🔗",
-      conjunction: "🤝",
-      interjection: "❗",
-    };
-
-    return iconMap[pos] || "📝";
-  }
+  // Intentionally minimal: no iconography for a cleaner look
 
   showError(word: string, error: string) {
     this.initialize();
