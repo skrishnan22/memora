@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom animations */
+@keyframes dialogSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@layer components {
+  dialog::backdrop {
+    background: rgba(15, 23, 42, 0.32);
+    backdrop-filter: blur(4px);
+    animation: backdropFadeIn 0.25s ease-out;
+  }
+
+  .memora-dialog { animation: dialogSlideIn 0.22s ease-out; }
+
+  .memora-slide-in { animation: slideInUp 0.25s ease-out both; }
+
+  .animate-delay-100 { animation-delay: 0.06s; }
+  .animate-delay-200 { animation-delay: 0.12s; }
+  .animate-delay-300 { animation-delay: 0.18s; }
+  .animate-delay-400 { animation-delay: 0.24s; }
+  .animate-delay-500 { animation-delay: 0.3s; }
+  
+  /* Custom border widths */
+  .border-3 {
+    border-width: 3px;
+  }
+  
+  /* Subtle scrollbar styles */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-track-slate-100::-webkit-scrollbar-track {
+    background-color: #f8fafc;
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thumb-slate-300::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+  }
+  
+  .scrollbar-thumb-slate-300:hover::-webkit-scrollbar-thumb {
+    background-color: #94a3b8;
+  }
+  
+  /* Better text rendering */
+  .memora-dialog {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  
+  /* Minimal hover interaction */
+  .group { transform-origin: center; }
+}
+

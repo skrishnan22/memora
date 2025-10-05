@@ -1,3 +1,5 @@
+import "./content.css";
+
 type ModalAction = "loading" | "success" | "error" | "hide";
 
 interface WordMeaning {
@@ -23,45 +25,42 @@ class MemoraDialog {
 
     const dialog = document.createElement("dialog");
     dialog.setAttribute("id", "memora-dialog");
-    dialog.style.cssText = `
-      position: fixed;
-      inset: 0;
-      width: min(520px, calc(100vw - 32px));
-      max-height: min(80vh, 720px);
-      margin: auto;
-      padding: 0;
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-      background: white;
-      color: #111;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial;
-    `;
+    dialog.className =
+      "memora-dialog fixed inset-0 w-[min(520px,calc(100vw-40px))] max-h-[min(80vh,760px)] m-auto p-0 rounded-2xl border border-emerald-200/60 bg-emerald-50 text-slate-900 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.08)]";
 
     dialog.innerHTML = `
-      <div style="display: flex; flex-direction: column; height: 100%;">
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #eee;">
-          <h3 style="margin: 0; font-size: 16px; font-weight: 600;">Memora</h3>
-          <button class="close-btn" style="appearance: none; border: none; background: transparent; font-size: 18px; cursor: pointer; line-height: 1; padding: 6px; border-radius: 8px;">×</button>
+      <div class="flex flex-col h-full relative">
+        <!-- App bar with green gradient and wave divider -->
+        <div class="relative">
+          <div class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-emerald-700 via-emerald-600 to-lime-600 text-white rounded-t-2xl">
+            <div class="w-8 h-8"></div>
+            <div class="flex-1 text-center">
+              <span class="text-xs font-semibold tracking-wide uppercase text-white/70">Memora</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button class="fav-btn appearance-none border-none cursor-pointer rounded-md w-8 h-8 flex items-center justify-center text-white/80 hover:text-yellow-300 transition-colors" title="Favorite">☆</button>
+              <button class="close-btn appearance-none border-none cursor-pointer rounded-md w-8 h-8 flex items-center justify-center text-white/80 hover:text-white" title="Close">×</button>
+            </div>
+          </div>
+          <!-- Wave divider matching container background -->
+          <svg class="block w-full h-6 text-emerald-50" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,0 V28 Q300,60 600,28 T1200,28 V0 Z" fill="currentColor"></path>
+          </svg>
         </div>
-        <div class="dialog-body" style="padding: 14px 16px; flex: 1; overflow-y: auto;"></div>
+        <div class="dialog-body p-0 flex-1 overflow-y-auto scrollbar-thin scrollbar-track-slate-100 scrollbar-thumb-slate-300 hover:scrollbar-thumb-slate-400"></div>
       </div>
     `;
 
-    // Style the backdrop
-    const style = document.createElement("style");
-    style.textContent = `
-      dialog::backdrop {
-        background: rgba(0,0,0,0.35);
-      }
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-    `;
-    document.head.appendChild(style);
-
+    const favBtn = dialog.querySelector(".fav-btn") as HTMLButtonElement;
+    if (favBtn) {
+      favBtn.addEventListener("click", () => {
+        favBtn.classList.toggle("text-yellow-300");
+      });
+    }
     const closeBtn = dialog.querySelector(".close-btn") as HTMLButtonElement;
-    closeBtn.addEventListener("click", () => this.hide());
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => this.hide());
+    }
 
     dialog.addEventListener("click", (e) => {
       if (e.target === dialog) this.hide();
@@ -83,9 +82,13 @@ class MemoraDialog {
     if (!this.content || !this.dialog) return;
 
     this.content.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 10px; color: #333;">
-        <div style="width: 16px; height: 16px; border: 2px solid #ddd; border-top-color: #666; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-        <div>Looking up "${this.escape(word)}"...</div>
+      <div class="flex flex-col items-center gap-4 py-10 px-5 text-center memora-slide-in">
+        <div class="w-10 h-10 border-3 border-emerald-200 border-t-emerald-700 rounded-full animate-spin"></div>
+        <div class="text-base font-medium text-slate-700 leading-normal">Looking up</div>
+        <div class="text-2xl font-bold text-slate-900 tracking-tight">“${this.escape(
+          word
+        )}”</div>
+        <div class="text-sm text-slate-500">Fetching definition…</div>
       </div>
     `;
     this.dialog.showModal();
@@ -95,43 +98,120 @@ class MemoraDialog {
     this.initialize();
     if (!this.content || !this.dialog) return;
 
-    let html = `<div><strong>${this.escape(word)}</strong></div>`;
+    let html = `
+      <div class="memora-slide-in">
+        <div class="px-6 pt-6 pb-3">
+          <div class="flex items-center gap-3 mb-1">
+            <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs">Aa</div>
+            <h2 class="text-[2.25rem] md:text-[2.5rem] font-extrabold tracking-tight leading-none m-0 text-slate-900">${this.escape(
+              word
+            )}</h2>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] font-medium text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">${
+              meanings?.length || 0
+            } ${meanings?.length !== 1 ? "meanings" : "meaning"}</span>
+          </div>
+        </div>
+        
+    `;
 
     if (!meanings?.length) {
-      html += "<div>No definitions found.</div>";
+      html += `
+        <div class="text-center py-15 px-5 text-slate-500">
+          <div class="text-5xl mb-4 opacity-50">🔍</div>
+          <div class="text-lg font-semibold mb-2 text-slate-600">No definitions found</div>
+          <div class="text-sm text-slate-500">Try searching for a different word</div>
+        </div>
+      `;
     } else {
-      meanings.slice(0, 5).forEach((m) => {
+      html += `<div class="flex flex-col gap-1.5 p-6">`;
+
+      meanings.slice(0, 5).forEach((m, index) => {
+        const animationDelay = index > 0 ? `animate-delay-${index}00` : "";
+
         html += `
-          <div style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
-            <div style="display: inline-block; font-size: 12px; color: #555; background: #f4f4f5; border-radius: 999px; padding: 2px 8px; margin-bottom: 6px;">${this.escape(
-              m.partOfSpeech || "meaning"
-            )}</div>
-            <p style="margin: 0 0 6px 0;">${this.escape(m.definition)}</p>
-            ${
-              m.example
-                ? `<p style="margin: 0; color: #555; font-style: italic;">"${this.escape(
+          <div class="group relative bg-white rounded-lg memora-slide-in ${animationDelay}">
+            <div class="py-4 px-5">
+              <div class="flex items-start gap-3">
+                <div class="flex-1">
+                  <div class="mb-1">
+                    <span class="inline-block text-[10px] font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">${this.escape(
+                      m.partOfSpeech || "meaning"
+                    )}</span>
+                  </div>
+                  <p class="m-0 text-[15px] leading-relaxed text-slate-800">${this.escape(
+                    m.definition
+                  )}</p>
+                  ${
                     m.example
-                  )}"</p>`
-                : ""
-            }
+                      ? `<div class=\"mt-2 p-2 rounded-md bg-slate-50 border border-slate-200\"><p class=\"m-0 text-[13px] leading-relaxed text-slate-600 italic\">${this.escape(
+                          m.example
+                        )}</p></div>`
+                      : ""
+                  }
+                </div>
+              </div>
+            </div>
           </div>
         `;
       });
+
+      html += `</div>`;
+
+      // Add footer note if there are more than 5 meanings
+      if (meanings.length > 5) {
+        html += `
+          <div class="px-6 py-3 text-center text-xs text-slate-500">Showing 5 of ${meanings.length} definitions</div>
+        `;
+      }
     }
 
+    html += `</div>`;
     this.content.innerHTML = html;
     this.dialog.showModal();
   }
+
+  // Intentionally minimal: no iconography for a cleaner look
 
   showError(word: string, error: string) {
     this.initialize();
     if (!this.content || !this.dialog) return;
 
     this.content.innerHTML = `
-      <div><strong>${this.escape(word)}</strong></div>
-      <div style="color: #b00020;">${this.escape(
-        error || "Something went wrong."
-      )}</div>
+      <div class="memora-slide-in">
+        <!-- Error header -->
+        <div class="text-center mb-8 pb-6 border-b-2 border-red-50">
+          <div class="text-5xl mb-4 opacity-80">⚠️</div>
+          <div class="text-2xl font-bold text-red-600 mb-2 tracking-tight">
+            ${this.escape(word)}
+          </div>
+          <div class="text-sm text-slate-500 font-medium">
+            Unable to fetch definition
+          </div>
+        </div>
+        
+        <!-- Error message -->
+        <div class="p-6 bg-gradient-to-br from-red-50 to-white rounded-2xl border border-red-200 shadow-sm relative overflow-hidden">
+          <!-- Decorative accent -->
+          <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-600 to-red-400"></div>
+          
+          <div class="text-xs font-bold text-red-600 mb-3 uppercase tracking-wider">Error Details</div>
+          
+          <div class="text-base leading-relaxed text-slate-800 font-medium mb-4">
+            ${this.escape(error || "Something went wrong.")}
+          </div>
+          
+          <div class="p-3 px-4 bg-red-600/5 border-l-[3px] border-red-600 rounded-lg mt-3">
+            <div class="text-xs font-semibold text-red-600 mb-1 uppercase tracking-wider">Suggestions</div>
+            <div class="text-sm text-slate-600 leading-normal">
+              • Check your internet connection<br>
+              • Try searching for a different word<br>
+              • Refresh the page and try again
+            </div>
+          </div>
+        </div>
+      </div>
     `;
     this.dialog.showModal();
   }
