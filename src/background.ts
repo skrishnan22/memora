@@ -1,7 +1,5 @@
-import { saveWord, type WordMeaning } from "./index-db";
+import { saveWord, deleteWord, type WordMeaning } from "./index-db";
 
-const SUCCESS_NOTIFICATION_ID = "memora-save-success";
-const ERROR_NOTIFICATION_ID = "memora-save-error";
 const DICTIONARY_API_URL = "https://api.dictionaryapi.dev/api/v2/entries/en";
 
 interface DictionaryApiDefinition {
@@ -127,5 +125,38 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     }
   }
 });
+
+chrome.runtime.onMessage.addListener(
+  (
+    message: {
+      type: string;
+      action: "save" | "delete";
+      word: string;
+      sourceUrl: string;
+    },
+    _sender,
+    _sendResponse
+  ) => {
+    if (!message) return;
+    if (message.type === "MEMORA_ACTION") {
+      const { action, word, sourceUrl } = message;
+
+      if (!word) return;
+
+      (async () => {
+        try {
+          if (action === "delete") {
+            await deleteWord(word);
+          } else if (action === "save") {
+            const meanings = await fetchWordMeanings(word);
+            await saveWord(word, sourceUrl, meanings);
+          }
+        } catch (err) {
+          console.error("MEMORA_ACTION failed:", action, word, err);
+        }
+      })();
+    }
+  }
+);
 
 export {};

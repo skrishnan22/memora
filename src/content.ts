@@ -19,6 +19,7 @@ interface ModalMessage {
 class MemoraDialog {
   private dialog: HTMLDialogElement | null = null;
   private content: HTMLElement | null = null;
+  private currentWord: string | null = null;
 
   initialize() {
     if (this.dialog) return;
@@ -77,6 +78,13 @@ class MemoraDialog {
           );
           favBtn.title = "Save to Memora";
           if (favTooltip) favTooltip.textContent = "Save to Memora";
+          if (this.currentWord) {
+            chrome.runtime.sendMessage({
+              type: "MEMORA_ACTION",
+              action: "delete",
+              word: this.currentWord,
+            });
+          }
         } else {
           // Switch to filled star
           favSvg.classList.remove(
@@ -88,6 +96,14 @@ class MemoraDialog {
           favSvg.classList.add("fill-yellow-300", "hover:fill-yellow-400");
           favBtn.title = "Saved to Memora";
           if (favTooltip) favTooltip.textContent = "Word saved in Memora";
+          if (this.currentWord) {
+            chrome.runtime.sendMessage({
+              type: "MEMORA_ACTION",
+              action: "save",
+              word: this.currentWord,
+              sourceUrl: location.href,
+            });
+          }
         }
       });
     }
@@ -114,6 +130,7 @@ class MemoraDialog {
   showLoading(word: string) {
     this.initialize();
     if (!this.content || !this.dialog) return;
+    this.currentWord = word;
 
     this.content.innerHTML = `
       <div class="flex flex-col items-center gap-4 py-10 px-5 text-center memora-slide-in">
@@ -131,6 +148,7 @@ class MemoraDialog {
   showSuccess(word: string, meanings: WordMeaning[]) {
     this.initialize();
     if (!this.content || !this.dialog) return;
+    this.currentWord = word;
 
     let html = `
       <div class="memora-slide-in">
@@ -254,6 +272,7 @@ class MemoraDialog {
     if (this.dialog) {
       this.dialog.close();
     }
+    this.currentWord = null;
   }
 
   private escape(input: string) {
