@@ -29,7 +29,7 @@ class MemoraDialog {
       "memora-dialog fixed inset-0 w-[min(520px,calc(100vw-40px))] max-h-[min(80vh,760px)] m-auto p-0 rounded-2xl border border-emerald-200/60 bg-emerald-50 text-slate-900 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.08)]";
 
     dialog.innerHTML = `
-      <div class="flex flex-col h-full relative">
+      <div class="flex flex-col relative">
         <!-- App bar with green gradient and wave divider -->
         <div class="relative">
           <div class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-emerald-700 via-emerald-600 to-lime-600 text-white rounded-t-2xl">
@@ -38,7 +38,14 @@ class MemoraDialog {
               <span class="text-xs font-semibold tracking-wide uppercase text-white/70">Memora</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <button class="fav-btn appearance-none border-none cursor-pointer rounded-md w-8 h-8 flex items-center justify-center text-white/80 hover:text-yellow-300 transition-colors" title="Favorite">☆</button>
+              <button class="fav-btn group relative appearance-none border-none cursor-pointer rounded-md w-8 h-8 flex items-center justify-center transition-colors" title="Saved to Memora" aria-label="Saved to Memora">
+                <svg class="w-5 h-5 fill-yellow-300 hover:fill-yellow-400 transition-colors" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                <div class="fav-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 text-[11px] font-medium text-white bg-black/80 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                  Word saved in Memora
+                </div>
+              </button>
               <button class="close-btn appearance-none border-none cursor-pointer rounded-md w-8 h-8 flex items-center justify-center text-white/80 hover:text-white" title="Close">×</button>
             </div>
           </div>
@@ -47,14 +54,41 @@ class MemoraDialog {
             <path d="M0,0 V28 Q300,60 600,28 T1200,28 V0 Z" fill="currentColor"></path>
           </svg>
         </div>
-        <div class="dialog-body p-0 flex-1 overflow-y-auto scrollbar-thin scrollbar-track-slate-100 scrollbar-thumb-slate-300 hover:scrollbar-thumb-slate-400"></div>
+        <div class="dialog-body p-0 overflow-y-auto scrollbar-thin scrollbar-track-slate-100 scrollbar-thumb-slate-300 hover:scrollbar-thumb-slate-400"></div>
       </div>
     `;
 
     const favBtn = dialog.querySelector(".fav-btn") as HTMLButtonElement;
-    if (favBtn) {
+    const favSvg = favBtn?.querySelector("svg");
+    const favTooltip = favBtn?.querySelector(
+      ".fav-tooltip"
+    ) as HTMLDivElement | null;
+    if (favBtn && favSvg) {
       favBtn.addEventListener("click", () => {
-        favBtn.classList.toggle("text-yellow-300");
+        const isFilled = favSvg.classList.contains("fill-yellow-300");
+        if (isFilled) {
+          // Switch to outlined star
+          favSvg.classList.remove("fill-yellow-300", "hover:fill-yellow-400");
+          favSvg.classList.add(
+            "fill-none",
+            "stroke-white/80",
+            "hover:stroke-white",
+            "stroke-[1.5]"
+          );
+          favBtn.title = "Save to Memora";
+          if (favTooltip) favTooltip.textContent = "Save to Memora";
+        } else {
+          // Switch to filled star
+          favSvg.classList.remove(
+            "fill-none",
+            "stroke-white/80",
+            "hover:stroke-white",
+            "stroke-[1.5]"
+          );
+          favSvg.classList.add("fill-yellow-300", "hover:fill-yellow-400");
+          favBtn.title = "Saved to Memora";
+          if (favTooltip) favTooltip.textContent = "Word saved in Memora";
+        }
       });
     }
     const closeBtn = dialog.querySelector(".close-btn") as HTMLButtonElement;
@@ -125,14 +159,14 @@ class MemoraDialog {
         </div>
       `;
     } else {
-      html += `<div class="flex flex-col gap-1.5 p-6">`;
+      html += `<div class="flex flex-col gap-4 px-6 py-4">`;
 
       meanings.slice(0, 5).forEach((m, index) => {
         const animationDelay = index > 0 ? `animate-delay-${index}00` : "";
 
         html += `
           <div class="group relative bg-white rounded-lg memora-slide-in ${animationDelay}">
-            <div class="py-4 px-5">
+            <div class="py-5 px-6">
               <div class="flex items-start gap-3">
                 <div class="flex-1">
                   <div class="mb-1">
