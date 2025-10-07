@@ -1,5 +1,3 @@
-import "./content.css";
-
 type ModalAction = "loading" | "success" | "error" | "hide";
 
 interface WordMeaning {
@@ -19,6 +17,7 @@ interface ModalMessage {
 class MemoraDialog {
   private dialog: HTMLDialogElement | null = null;
   private content: HTMLElement | null = null;
+  private currentWord: string | null = null;
 
   initialize() {
     if (this.dialog) return;
@@ -29,7 +28,7 @@ class MemoraDialog {
       "memora-dialog fixed inset-0 w-[min(520px,calc(100vw-40px))] max-h-[min(80vh,760px)] m-auto p-0 rounded-2xl border border-emerald-200/60 bg-emerald-50 text-slate-900 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.08)]";
 
     dialog.innerHTML = `
-      <div class="flex flex-col h-full relative">
+      <div class="flex flex-col relative">
         <!-- App bar with green gradient and wave divider -->
         <div class="relative">
           <div class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-emerald-700 via-emerald-600 to-lime-600 text-white rounded-t-2xl">
@@ -38,7 +37,14 @@ class MemoraDialog {
               <span class="text-xs font-semibold tracking-wide uppercase text-white/70">Memora</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <button class="fav-btn appearance-none border-none cursor-pointer rounded-md w-8 h-8 flex items-center justify-center text-white/80 hover:text-yellow-300 transition-colors" title="Favorite">☆</button>
+              <button class="fav-btn group relative appearance-none border-none cursor-pointer rounded-md w-8 h-8 flex items-center justify-center transition-colors" title="Saved to Memora" aria-label="Saved to Memora">
+                <svg class="w-5 h-5 fill-yellow-300 hover:fill-yellow-400 transition-colors" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                <div class="fav-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 text-[11px] font-medium text-white bg-black/80 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                  Word saved in Memora
+                </div>
+              </button>
               <button class="close-btn appearance-none border-none cursor-pointer rounded-md w-8 h-8 flex items-center justify-center text-white/80 hover:text-white" title="Close">×</button>
             </div>
           </div>
@@ -47,14 +53,54 @@ class MemoraDialog {
             <path d="M0,0 V28 Q300,60 600,28 T1200,28 V0 Z" fill="currentColor"></path>
           </svg>
         </div>
-        <div class="dialog-body p-0 flex-1 overflow-y-auto scrollbar-thin scrollbar-track-slate-100 scrollbar-thumb-slate-300 hover:scrollbar-thumb-slate-400"></div>
+        <div class="dialog-body p-0 overflow-y-auto scrollbar-thin scrollbar-track-slate-100 scrollbar-thumb-slate-300 hover:scrollbar-thumb-slate-400"></div>
       </div>
     `;
 
     const favBtn = dialog.querySelector(".fav-btn") as HTMLButtonElement;
-    if (favBtn) {
+    const favSvg = favBtn?.querySelector("svg");
+    const favTooltip = favBtn?.querySelector(
+      ".fav-tooltip"
+    ) as HTMLDivElement | null;
+    if (favBtn && favSvg) {
       favBtn.addEventListener("click", () => {
-        favBtn.classList.toggle("text-yellow-300");
+        const isFilled = favSvg.classList.contains("fill-yellow-300");
+        if (isFilled) {
+          favSvg.classList.remove("fill-yellow-300", "hover:fill-yellow-400");
+          favSvg.classList.add(
+            "fill-none",
+            "stroke-white/80",
+            "hover:stroke-white",
+            "stroke-[1.5]"
+          );
+          favBtn.title = "Save to Memora";
+          if (favTooltip) favTooltip.textContent = "Save to Memora";
+          if (this.currentWord) {
+            chrome.runtime.sendMessage({
+              type: "MEMORA_ACTION",
+              action: "delete",
+              word: this.currentWord,
+            });
+          }
+        } else {
+          favSvg.classList.remove(
+            "fill-none",
+            "stroke-white/80",
+            "hover:stroke-white",
+            "stroke-[1.5]"
+          );
+          favSvg.classList.add("fill-yellow-300", "hover:fill-yellow-400");
+          favBtn.title = "Saved to Memora";
+          if (favTooltip) favTooltip.textContent = "Word saved in Memora";
+          if (this.currentWord) {
+            chrome.runtime.sendMessage({
+              type: "MEMORA_ACTION",
+              action: "save",
+              word: this.currentWord,
+              sourceUrl: location.href,
+            });
+          }
+        }
       });
     }
     const closeBtn = dialog.querySelector(".close-btn") as HTMLButtonElement;
@@ -66,7 +112,7 @@ class MemoraDialog {
       if (e.target === dialog) this.hide();
     });
 
-    document.documentElement.appendChild(dialog);
+    ensureShadowRoot().appendChild(dialog);
     this.dialog = dialog;
     this.content = dialog.querySelector(".dialog-body") as HTMLElement;
 
@@ -80,6 +126,7 @@ class MemoraDialog {
   showLoading(word: string) {
     this.initialize();
     if (!this.content || !this.dialog) return;
+    this.currentWord = word;
 
     this.content.innerHTML = `
       <div class="flex flex-col items-center gap-4 py-10 px-5 text-center memora-slide-in">
@@ -97,6 +144,7 @@ class MemoraDialog {
   showSuccess(word: string, meanings: WordMeaning[]) {
     this.initialize();
     if (!this.content || !this.dialog) return;
+    this.currentWord = word;
 
     let html = `
       <div class="memora-slide-in">
@@ -125,14 +173,14 @@ class MemoraDialog {
         </div>
       `;
     } else {
-      html += `<div class="flex flex-col gap-1.5 p-6">`;
+      html += `<div class="flex flex-col gap-4 px-6 py-4">`;
 
       meanings.slice(0, 5).forEach((m, index) => {
         const animationDelay = index > 0 ? `animate-delay-${index}00` : "";
 
         html += `
           <div class="group relative bg-white rounded-lg memora-slide-in ${animationDelay}">
-            <div class="py-4 px-5">
+            <div class="py-5 px-6">
               <div class="flex items-start gap-3">
                 <div class="flex-1">
                   <div class="mb-1">
@@ -159,7 +207,6 @@ class MemoraDialog {
 
       html += `</div>`;
 
-      // Add footer note if there are more than 5 meanings
       if (meanings.length > 5) {
         html += `
           <div class="px-6 py-3 text-center text-xs text-slate-500">Showing 5 of ${meanings.length} definitions</div>
@@ -171,8 +218,6 @@ class MemoraDialog {
     this.content.innerHTML = html;
     this.dialog.showModal();
   }
-
-  // Intentionally minimal: no iconography for a cleaner look
 
   showError(word: string, error: string) {
     this.initialize();
@@ -220,6 +265,7 @@ class MemoraDialog {
     if (this.dialog) {
       this.dialog.close();
     }
+    this.currentWord = null;
   }
 
   private escape(input: string) {
@@ -248,3 +294,59 @@ chrome.runtime.onMessage.addListener((message: ModalMessage) => {
 });
 
 export {};
+
+let shadowRootRef: ShadowRoot | null = null;
+
+function ensureShadowRoot(): ShadowRoot {
+  if (shadowRootRef) return shadowRootRef;
+
+  const host = document.createElement("div");
+  host.id = "memora-shadow-host";
+  host.style.all = "initial";
+  host.style.position = "fixed";
+  host.style.zIndex = "2147483647"; // top-most, dialog still uses top layer
+  host.style.inset = "0 auto auto 0"; // anchor but no size
+  host.style.width = "0";
+  host.style.height = "0";
+  document.documentElement.appendChild(host);
+
+  const root = host.attachShadow({ mode: "open" });
+  shadowRootRef = root;
+
+  const style = document.createElement("style");
+
+  try {
+    const cssUrl = chrome.runtime.getURL("contentStyle.css");
+    fetch(cssUrl)
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((css) => {
+        if ((root as any).adoptedStyleSheets !== undefined) {
+          try {
+            const sheet = new CSSStyleSheet();
+            (sheet as any).replaceSync(css);
+            const existing = (root as any).adoptedStyleSheets || [];
+            (root as any).adoptedStyleSheets = [...existing, sheet];
+            return;
+          } catch (err) {
+            // This ensures styling still works under strict CSPs or older Chromium versions
+            console.warn(
+              "Memora: failed to use adoptedStyleSheets; falling back to <style>",
+              err
+            );
+            style.textContent = css;
+            root.appendChild(style);
+            return;
+          }
+        }
+        style.textContent = css;
+        root.appendChild(style);
+      })
+      .catch((err) => {
+        console.warn("Memora: failed to fetch contentStyle.css", err);
+      });
+  } catch (err) {
+    console.warn("Memora: failed to fetch contentStyle.css", err);
+  }
+
+  return root;
+}
