@@ -1,5 +1,3 @@
-import "./content.css";
-
 type ModalAction = "loading" | "success" | "error" | "hide";
 
 interface WordMeaning {
@@ -68,7 +66,6 @@ class MemoraDialog {
       favBtn.addEventListener("click", () => {
         const isFilled = favSvg.classList.contains("fill-yellow-300");
         if (isFilled) {
-          // Switch to outlined star
           favSvg.classList.remove("fill-yellow-300", "hover:fill-yellow-400");
           favSvg.classList.add(
             "fill-none",
@@ -86,7 +83,6 @@ class MemoraDialog {
             });
           }
         } else {
-          // Switch to filled star
           favSvg.classList.remove(
             "fill-none",
             "stroke-white/80",
@@ -116,7 +112,7 @@ class MemoraDialog {
       if (e.target === dialog) this.hide();
     });
 
-    document.documentElement.appendChild(dialog);
+    ensureShadowRoot().appendChild(dialog);
     this.dialog = dialog;
     this.content = dialog.querySelector(".dialog-body") as HTMLElement;
 
@@ -211,7 +207,6 @@ class MemoraDialog {
 
       html += `</div>`;
 
-      // Add footer note if there are more than 5 meanings
       if (meanings.length > 5) {
         html += `
           <div class="px-6 py-3 text-center text-xs text-slate-500">Showing 5 of ${meanings.length} definitions</div>
@@ -223,8 +218,6 @@ class MemoraDialog {
     this.content.innerHTML = html;
     this.dialog.showModal();
   }
-
-  // Intentionally minimal: no iconography for a cleaner look
 
   showError(word: string, error: string) {
     this.initialize();
@@ -301,3 +294,59 @@ chrome.runtime.onMessage.addListener((message: ModalMessage) => {
 });
 
 export {};
+
+let shadowRootRef: ShadowRoot | null = null;
+
+function ensureShadowRoot(): ShadowRoot {
+  if (shadowRootRef) return shadowRootRef;
+
+  const host = document.createElement("div");
+  host.id = "memora-shadow-host";
+  host.style.all = "initial";
+  host.style.position = "fixed";
+  host.style.zIndex = "2147483647"; // top-most, dialog still uses top layer
+  host.style.inset = "0 auto auto 0"; // anchor but no size
+  host.style.width = "0";
+  host.style.height = "0";
+  document.documentElement.appendChild(host);
+
+  const root = host.attachShadow({ mode: "open" });
+  shadowRootRef = root;
+
+  const style = document.createElement("style");
+
+  try {
+    const cssUrl = chrome.runtime.getURL("contentStyle.css");
+    fetch(cssUrl)
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((css) => {
+        if ((root as any).adoptedStyleSheets !== undefined) {
+          try {
+            const sheet = new CSSStyleSheet();
+            (sheet as any).replaceSync(css);
+            const existing = (root as any).adoptedStyleSheets || [];
+            (root as any).adoptedStyleSheets = [...existing, sheet];
+            return;
+          } catch (err) {
+            // This ensures styling still works under strict CSPs or older Chromium versions
+            console.warn(
+              "Memora: failed to use adoptedStyleSheets; falling back to <style>",
+              err
+            );
+            style.textContent = css;
+            root.appendChild(style);
+            return;
+          }
+        }
+        style.textContent = css;
+        root.appendChild(style);
+      })
+      .catch((err) => {
+        console.warn("Memora: failed to fetch contentStyle.css", err);
+      });
+  } catch (err) {
+    console.warn("Memora: failed to fetch contentStyle.css", err);
+  }
+
+  return root;
+}
