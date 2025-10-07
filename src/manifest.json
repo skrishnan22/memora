@@ -14,13 +14,18 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "css": ["content.css"]
+      "js": ["content.js"]
     }
   ],
   "icons": {
     "16": "icon-16.png",
     "38": "icon-38.png",
     "128": "icon-128.png"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["contentStyle.css"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
