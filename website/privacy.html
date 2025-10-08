@@ -6,17 +6,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,follow">
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+  <style>
+    body { background:#fbfbf7; }
+    .grid-board { background-color: #ffffff; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><defs><pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0v40" fill="none" stroke="%23dcdcdc" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23g)"/></svg>'); background-size: 40px 40px; border: 3px solid #111; border-radius: 18px; }
+    .font-hand { font-family: 'Kalam', cursive; }
+    .font-ui { font-family: 'Patrick Hand', cursive; }
+  </style>
 </head>
 <body class="antialiased text-slate-800">
-  <main class="mx-auto max-w-3xl px-6 py-12">
-    <h1 class="text-3xl font-bold tracking-tight">Privacy Policy</h1>
-    <p class="mt-4 text-slate-700">Memora stores your saved words locally in your browser using IndexedDB. We do not collect, transmit, or sell your data.</p>
-    <h2 class="mt-8 text-xl font-semibold">What data is stored</h2>
-    <p class="mt-2 text-slate-700">Saved words, their meanings fetched from a public dictionary API, and the source URL where you saved them.</p>
-    <h2 class="mt-8 text-xl font-semibold">Third‑party services</h2>
-    <p class="mt-2 text-slate-700">Definitions are fetched from dictionaryapi.dev. If analytics are added later, this page will be updated to reflect that.</p>
-    <p class="mt-8 text-slate-700">Contact: <a href="mailto:hello@your-domain.com" class="text-emerald-700 underline">hello@your-domain.com</a></p>
-    <p class="mt-8"><a href="/" class="text-emerald-700 underline">← Back to home</a></p>
+  <main class="mx-auto max-w-3xl px-6 py-12 grid-board p-8 mt-10">
+    <h1 class="text-3xl font-bold tracking-tight font-hand">Privacy Policy</h1>
+    <p class="mt-4 text-slate-700 font-ui">Memora stores your saved words locally in your browser using IndexedDB. We do not collect, transmit, or sell your data.</p>
+    <h2 class="mt-8 text-xl font-semibold font-hand">What data is stored</h2>
+    <p class="mt-2 text-slate-700 font-ui">Saved words, their meanings fetched from a public dictionary API, and the source URL where you saved them.</p>
+    <h2 class="mt-8 text-xl font-semibold font-hand">Third‑party services</h2>
+    <p class="mt-2 text-slate-700 font-ui">Definitions are fetched from dictionaryapi.dev. If analytics are added later, this page will be updated to reflect that.</p>
+    <p class="mt-8 text-slate-700 font-ui">Contact: <a href="mailto:hello@your-domain.com" class="text-emerald-700 underline">hello@your-domain.com</a></p>
+    <p class="mt-8 font-ui"><a href="/" class="text-emerald-700 underline">← Back to home</a></p>
   </main>
 </body>
 </html>

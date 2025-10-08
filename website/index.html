@@ -32,19 +32,54 @@
   }
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Handwritten style fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brand: { 50: '#ecfdf5', 100: '#d1fae5', 600: '#059669', 700: '#047857' }
+            brand: { 50: '#fbfbf7', 100: '#f3f3ec', 600: '#0f766e', 700: '#115e59' },
+            ink: '#111111',
+            paper: '#fbfbf7',
+            accent: '#e94f37'
+          },
+          fontFamily: {
+            hand: ['"Kalam"', 'cursive'],
+            ui: ['"Patrick Hand"', 'cursive']
           }
         }
       }
     }
   </script>
   <style>
+    :root { --ink:#111111; --paper:#fbfbf7; --accent:#e94f37 }
     .shadow-soft { box-shadow: 0 10px 30px rgba(0,0,0,.08) }
+    body { background: var(--paper); }
+    .scribble-btn {
+      border: 3px solid var(--ink);
+      border-radius: 14px;
+      box-shadow: 4px 4px 0 0 var(--ink);
+      transform: translate(-1px, -1px);
+      transition: transform .12s ease, box-shadow .12s ease, background-color .2s ease;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><g fill="%23e9e9e1"><circle cx="2" cy="2" r="1.2"/><circle cx="8" cy="5" r="1"/><circle cx="5" cy="9" r="0.9"/></g></svg>');
+      background-size: 24px 24px;
+      background-color: #fffdf4;
+    }
+    .scribble-btn:hover { transform: translate(0,0); box-shadow: 2px 2px 0 0 var(--ink); }
+    .wiggle:hover { animation: wiggle .28s ease-in-out; }
+    @keyframes wiggle { 0%,100%{ transform: rotate(0deg)} 25%{ transform: rotate(-1deg)} 75%{ transform: rotate(1deg)} }
+    .grid-board {
+      background-color: #ffffff;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><defs><pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0v40" fill="none" stroke="%23dcdcdc" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23g)"/></svg>');
+      background-size: 40px 40px;
+      border: 3px solid var(--ink);
+      border-radius: 18px;
+    }
+    .reveal { opacity: 0; transform: translateY(12px) scale(.98); transition: opacity .6s ease, transform .6s cubic-bezier(.2,.6,.2,1) }
+    .revealed { opacity: 1; transform: translateY(0) scale(1) }
+    .floaty { animation: floaty 6s ease-in-out infinite }
+    @keyframes floaty { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-8px) } }
   </style>
   
 </head>
@@ -53,70 +88,70 @@
     <div class="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <img src="/assets/icon-128.png" alt="Memora icon" class="w-8 h-8 rounded">
-        <span class="font-semibold tracking-tight">Memora</span>
+        <span class="font-semibold tracking-tight font-ui text-lg">Memora</span>
       </div>
       <nav class="hidden md:flex items-center gap-6 text-sm">
-        <a href="#features" class="hover:text-slate-900 text-slate-600">Features</a>
-        <a href="#how" class="hover:text-slate-900 text-slate-600">How it works</a>
-        <a href="https://github.com/skrishnan22/memora" class="hover:text-slate-900 text-slate-600">GitHub</a>
-        <a id="cta-header" href="https://chrome.google.com/webstore/detail/your-extension-id" class="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-1.5 font-medium text-white hover:bg-emerald-700">Add to Chrome</a>
+        <a href="#features" class="hover:text-slate-900 text-slate-600 font-ui">Features</a>
+        <a href="#how" class="hover:text-slate-900 text-slate-600 font-ui">How it works</a>
+        <a href="https://github.com/skrishnan22/memora" class="hover:text-slate-900 text-slate-600 font-ui">GitHub</a>
+        <a id="cta-header" href="https://chrome.google.com/webstore/detail/your-extension-id" class="inline-flex items-center justify-center px-3 py-1.5 font-ui text-[17px] bg-white text-ink scribble-btn">Add to Chrome</a>
       </nav>
     </div>
   </header>
 
-  <section class="bg-gradient-to-br from-emerald-700 via-emerald-600 to-lime-600">
-    <div class="mx-auto max-w-6xl px-6 py-16 md:py-20 grid md:grid-cols-2 items-center gap-10 text-white">
+  <section>
+    <div class="mx-auto max-w-6xl px-6 py-16 md:py-20 grid md:grid-cols-2 items-center gap-10">
       <div>
-        <p class="uppercase text-xs font-semibold tracking-widest text-white/80">Vocabulary Trainer</p>
-        <h1 class="mt-3 text-4xl md:text-5xl font-extrabold tracking-tight">Learn new words as you browse</h1>
-        <p class="mt-4 text-white/90 leading-relaxed">Select a word on any website to see its definition instantly. Save words with one click and revisit them later—without breaking your reading flow.</p>
+        <p class="uppercase text-xs font-semibold tracking-widest text-slate-500">Vocabulary Trainer</p>
+        <h1 class="mt-3 text-4xl md:text-5xl font-extrabold tracking-tight font-hand text-ink">Learn new words as you browse</h1>
+        <p class="mt-4 text-slate-700 leading-relaxed font-ui text-[19px]">Select a word on any website to see its definition instantly. Save words with one click and revisit them later.Effortlessly improve your vocabulary</p>
         <div class="mt-8 flex flex-col sm:flex-row gap-3">
-          <a id="cta-hero" href="https://chrome.google.com/webstore/detail/your-extension-id" class="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 text-emerald-700 font-semibold hover:bg-emerald-50">Add to Chrome</a>
-          <a href="#features" class="inline-flex items-center justify-center rounded-xl bg-emerald-800/30 px-5 py-3 text-white font-semibold hover:bg-emerald-800/40">See features</a>
+          <a id="cta-hero" href="https://chrome.google.com/webstore/detail/your-extension-id" class="inline-flex items-center justify-center px-6 py-3 text-[18px] font-ui text-ink scribble-btn wiggle">Add to Chrome</a>
+          <a href="#features" class="inline-flex items-center justify-center px-6 py-3 text-[18px] font-ui text-ink scribble-btn" style="background-color:#fff;">See features</a>
         </div>
-        <div class="mt-4 text-white/80 text-sm">Free. Lightweight. Privacy‑friendly.</div>
+        <div class="mt-4 text-slate-600 text-sm font-ui">Free. Lightweight. Privacy‑friendly.</div>
       </div>
-      <div class="relative">
-        <img src="/assets/icon-128.png" alt="Memora preview" class="w-40 h-40 rounded-2xl shadow-soft ring-1 ring-white/20 mx-auto">
+      <div class="relative grid-board p-6 md:p-8 rotate-1" style="perspective:1000px">
+        <img id="hero-illu" src="/assets/hero-doodle.svg" alt="Hand-drawn illustration" class="w-full h-auto floaty"/>
       </div>
     </div>
   </section>
 
   <section id="features" class="mx-auto max-w-6xl px-6 py-16">
     <div class="grid gap-8 md:grid-cols-3">
-      <div class="rounded-2xl border border-slate-200 p-6">
+      <div class="rounded-2xl border border-slate-200 p-6 reveal" data-reveal>
         <div class="text-3xl">🖱️</div>
-        <h3 class="mt-3 font-semibold text-lg">Right‑click lookup</h3>
-        <p class="mt-2 text-slate-600">Use the “Lookup in Memora” context menu to fetch definitions without leaving the page.</p>
+        <h3 class="mt-3 font-semibold text-lg font-hand">Right‑click lookup</h3>
+        <p class="mt-2 text-slate-600 font-ui">Use the “Lookup in Memora” context menu to fetch definitions without leaving the page.</p>
       </div>
-      <div class="rounded-2xl border border-slate-200 p-6">
+      <div class="rounded-2xl border border-slate-200 p-6 reveal" data-reveal>
         <div class="text-3xl">⭐</div>
-        <h3 class="mt-3 font-semibold text-lg">One‑click save</h3>
-        <p class="mt-2 text-slate-600">Save or remove words from the in‑page modal. Your list stores locally for quick review.</p>
+        <h3 class="mt-3 font-semibold text-lg font-hand">One‑click save</h3>
+        <p class="mt-2 text-slate-600 font-ui">Save or remove words from the in‑page modal. Your list stores locally for quick review.</p>
       </div>
-      <div class="rounded-2xl border border-slate-200 p-6">
+      <div class="rounded-2xl border border-slate-200 p-6 reveal" data-reveal>
         <div class="text-3xl">🔒</div>
-        <h3 class="mt-3 font-semibold text-lg">Privacy‑friendly</h3>
-        <p class="mt-2 text-slate-600">Meanings are fetched live; saved vocabulary is stored locally via IndexedDB—your data stays on your device.</p>
+        <h3 class="mt-3 font-semibold text-lg font-hand">Privacy‑friendly</h3>
+        <p class="mt-2 text-slate-600 font-ui">Meanings are fetched live; saved vocabulary is stored locally via IndexedDB—your data stays on your device.</p>
       </div>
     </div>
   </section>
 
   <section id="how" class="mx-auto max-w-6xl px-6 pb-20">
-    <div class="rounded-3xl bg-slate-50 border border-slate-200 p-8">
-      <h2 class="text-2xl font-bold tracking-tight">How it works</h2>
+    <div class="rounded-3xl bg-white border-2 border-black p-8 grid-board">
+      <h2 class="text-2xl font-bold tracking-tight font-hand">How it works</h2>
       <ol class="mt-5 grid gap-6 md:grid-cols-3">
-        <li class="bg-white border border-slate-200 rounded-xl p-5">
-          <div class="text-sm font-semibold text-emerald-700">1. Install</div>
-          <p class="mt-1 text-slate-600">Add Memora from the Chrome Web Store.</p>
+        <li class="bg-white border-2 border-black rounded-xl p-5 reveal" data-reveal>
+          <div class="text-sm font-semibold text-emerald-700 font-ui">1. Install</div>
+          <p class="mt-1 text-slate-700 font-ui">Add Memora from the Chrome Web Store.</p>
         </li>
-        <li class="bg-white border border-slate-200 rounded-xl p-5">
-          <div class="text-sm font-semibold text-emerald-700">2. Select</div>
-          <p class="mt-1 text-slate-600">Highlight a word, then choose “Lookup in Memora”.</p>
+        <li class="bg-white border-2 border-black rounded-xl p-5 reveal" data-reveal>
+          <div class="text-sm font-semibold text-emerald-700 font-ui">2. Select</div>
+          <p class="mt-1 text-slate-700 font-ui">Highlight a word, then choose “Lookup in Memora”.</p>
         </li>
-        <li class="bg-white border border-slate-200 rounded-xl p-5">
-          <div class="text-sm font-semibold text-emerald-700">3. Save & review</div>
-          <p class="mt-1 text-slate-600">See meanings instantly and save words with a star.</p>
+        <li class="bg-white border-2 border-black rounded-xl p-5 reveal" data-reveal>
+          <div class="text-sm font-semibold text-emerald-700 font-ui">3. Save & review</div>
+          <p class="mt-1 text-slate-700 font-ui">See meanings instantly and save words with a star.</p>
         </li>
       </ol>
     </div>
@@ -126,18 +161,44 @@
     <div class="mx-auto max-w-6xl px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-3">
         <img src="/assets/icon-16.png" alt="Memora icon small" class="w-4 h-4 rounded">
-        <span class="text-sm text-slate-500">© <span id="y"></span> Memora</span>
+        <span class="text-sm text-slate-500 font-ui">© <span id="y"></span> Memora</span>
       </div>
       <nav class="flex items-center gap-4 text-sm">
-        <a href="/privacy.html" class="text-slate-600 hover:text-slate-900">Privacy</a>
-        <a href="https://github.com/skrishnan22/memora" class="text-slate-600 hover:text-slate-900">GitHub</a>
-        <a id="cta-footer" href="https://chrome.google.com/webstore/detail/your-extension-id" class="text-emerald-700 font-semibold hover:text-emerald-800">Add to Chrome</a>
+        <a href="/privacy.html" class="text-slate-600 hover:text-slate-900 font-ui">Privacy</a>
+        <a href="https://github.com/skrishnan22/memora" class="text-slate-600 hover:text-slate-900 font-ui">GitHub</a>
+        <a id="cta-footer" href="https://chrome.google.com/webstore/detail/your-extension-id" class="font-ui text-ink px-3 py-1.5 scribble-btn">Add to Chrome</a>
       </nav>
     </div>
   </footer>
 
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target);
+        }
+      })
+    }, { threshold: 0.1 });
+    document.querySelectorAll('[data-reveal]').forEach((el) => {
+      el.classList.add('reveal');
+      observer.observe(el);
+    });
+    // Simple tilt effect on hero illustration
+    const tilt = document.getElementById('hero-illu');
+    if (tilt) {
+      const reset = () => tilt.style.transform = '';
+      tilt.addEventListener('mousemove', (e) => {
+        const r = tilt.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        tilt.style.transform = `rotateX(${py * -6}deg) rotateY(${px * 6}deg)`;
+      });
+      tilt.addEventListener('mouseleave', reset);
+      tilt.addEventListener('blur', reset);
+    }
   </script>
 </body>
 </html>
