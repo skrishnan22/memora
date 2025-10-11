@@ -7,7 +7,7 @@ interface WordMeaning {
 }
 
 interface ModalMessage {
-  type: "MEMORA_MODAL";
+  type: "LEXMORA_MODAL";
   action: ModalAction;
   word?: string;
   meanings?: WordMeaning[];
@@ -23,9 +23,9 @@ class LexmoraDialog {
     if (this.dialog) return;
 
     const dialog = document.createElement("dialog");
-    dialog.setAttribute("id", "memora-dialog");
+    dialog.setAttribute("id", "lexmora-dialog");
     dialog.className =
-      "memora-dialog fixed inset-0 w-[min(520px,calc(100vw-40px))] max-h-[min(80vh,760px)] m-auto p-0 rounded-2xl border border-emerald-200/60 bg-emerald-50 text-slate-900 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.08)]";
+      "lexmora-dialog fixed inset-0 w-[min(520px,calc(100vw-40px))] max-h-[min(80vh,760px)] m-auto p-0 rounded-2xl border border-emerald-200/60 bg-emerald-50 text-slate-900 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.08)]";
 
     dialog.innerHTML = `
       <div class="flex flex-col relative">
@@ -77,7 +77,7 @@ class LexmoraDialog {
           if (favTooltip) favTooltip.textContent = "Save to Lexmora";
           if (this.currentWord) {
             chrome.runtime.sendMessage({
-              type: "MEMORA_ACTION",
+              type: "LEXMORA_ACTION",
               action: "delete",
               word: this.currentWord,
             });
@@ -94,7 +94,7 @@ class LexmoraDialog {
           if (favTooltip) favTooltip.textContent = "Word saved in Lexmora";
           if (this.currentWord) {
             chrome.runtime.sendMessage({
-              type: "MEMORA_ACTION",
+              type: "LEXMORA_ACTION",
               action: "save",
               word: this.currentWord,
               sourceUrl: location.href,
@@ -129,7 +129,7 @@ class LexmoraDialog {
     this.currentWord = word;
 
     this.content.innerHTML = `
-      <div class="flex flex-col items-center gap-4 py-10 px-5 text-center memora-slide-in">
+      <div class="flex flex-col items-center gap-4 py-10 px-5 text-center lexmora-slide-in">
         <div class="w-10 h-10 border-3 border-emerald-200 border-t-emerald-700 rounded-full animate-spin"></div>
         <div class="text-base font-medium text-slate-700 leading-normal">Looking up</div>
         <div class="text-2xl font-bold text-slate-900 tracking-tight">“${this.escape(
@@ -147,7 +147,7 @@ class LexmoraDialog {
     this.currentWord = word;
 
     let html = `
-      <div class="memora-slide-in">
+      <div class="lexmora-slide-in">
         <div class="px-6 pt-6 pb-3">
           <div class="flex items-center gap-3 mb-1">
             <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs">Aa</div>
@@ -179,7 +179,7 @@ class LexmoraDialog {
         const animationDelay = index > 0 ? `animate-delay-${index}00` : "";
 
         html += `
-          <div class="group relative bg-white rounded-lg memora-slide-in ${animationDelay}">
+          <div class="group relative bg-white rounded-lg lexmora-slide-in ${animationDelay}">
             <div class="py-5 px-6">
               <div class="flex items-start gap-3">
                 <div class="flex-1">
@@ -224,7 +224,7 @@ class LexmoraDialog {
     if (!this.content || !this.dialog) return;
 
     this.content.innerHTML = `
-      <div class="memora-slide-in">
+      <div class="lexmora-slide-in">
         <!-- Error header -->
         <div class="text-center mb-8 pb-6 border-b-2 border-red-50">
           <div class="text-5xl mb-4 opacity-80">⚠️</div>
@@ -278,7 +278,7 @@ class LexmoraDialog {
 const dialog = new LexmoraDialog();
 
 chrome.runtime.onMessage.addListener((message: ModalMessage) => {
-  if (!message || message.type !== "MEMORA_MODAL") return;
+  if (!message || message.type !== "LEXMORA_MODAL") return;
   if (message.action === "loading" && message.word) {
     dialog.showLoading(message.word);
   } else if (message.action === "success" && message.word) {
@@ -301,7 +301,7 @@ function ensureShadowRoot(): ShadowRoot {
   if (shadowRootRef) return shadowRootRef;
 
   const host = document.createElement("div");
-  host.id = "memora-shadow-host";
+  host.id = "lexmora-shadow-host";
   host.style.all = "initial";
   host.style.position = "fixed";
   host.style.zIndex = "2147483647"; // top-most, dialog still uses top layer

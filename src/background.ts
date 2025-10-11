@@ -93,7 +93,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       const activeTabId = tab?.id;
       if (activeTabId) {
         chrome.tabs.sendMessage(activeTabId, {
-          type: "MEMORA_MODAL",
+          type: "LEXMORA_MODAL",
           action: "loading",
           word: info.selectionText,
         });
@@ -105,7 +105,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       console.log("Word saved successfully");
       if (activeTabId) {
         chrome.tabs.sendMessage(activeTabId, {
-          type: "MEMORA_MODAL",
+          type: "LEXMORA_MODAL",
           action: "success",
           word: info.selectionText,
           meanings,
@@ -116,7 +116,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
       if (tab?.id) {
         chrome.tabs.sendMessage(tab.id, {
-          type: "MEMORA_MODAL",
+          type: "LEXMORA_MODAL",
           action: "error",
           word: info.selectionText,
           error: "Failed to fetch or save meaning.",
@@ -138,7 +138,7 @@ chrome.runtime.onMessage.addListener(
     _sendResponse
   ) => {
     if (!message) return;
-    if (message.type === "MEMORA_ACTION") {
+    if (message.type === "LEXMORA_ACTION") {
       const { action, word, sourceUrl } = message;
 
       if (!word) return;
@@ -152,7 +152,7 @@ chrome.runtime.onMessage.addListener(
             await saveWord(word, sourceUrl, meanings);
           }
         } catch (err) {
-          console.error("MEMORA_ACTION failed:", action, word, err);
+          console.error("LEXMORA_ACTION failed:", action, word, err);
         }
       })();
     }
