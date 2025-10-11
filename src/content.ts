@@ -7,14 +7,14 @@ interface WordMeaning {
 }
 
 interface ModalMessage {
-  type: "MEMORA_MODAL";
+  type: "LEXMORA_MODAL";
   action: ModalAction;
   word?: string;
   meanings?: WordMeaning[];
   error?: string;
 }
 
-class MemoraDialog {
+class LexmoraDialog {
   private dialog: HTMLDialogElement | null = null;
   private content: HTMLElement | null = null;
   private currentWord: string | null = null;
@@ -23,9 +23,9 @@ class MemoraDialog {
     if (this.dialog) return;
 
     const dialog = document.createElement("dialog");
-    dialog.setAttribute("id", "memora-dialog");
+    dialog.setAttribute("id", "lexmora-dialog");
     dialog.className =
-      "memora-dialog fixed inset-0 w-[min(520px,calc(100vw-40px))] max-h-[min(80vh,760px)] m-auto p-0 rounded-2xl border border-emerald-200/60 bg-emerald-50 text-slate-900 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.08)]";
+      "lexmora-dialog fixed inset-0 w-[min(520px,calc(100vw-40px))] max-h-[min(80vh,760px)] m-auto p-0 rounded-2xl border border-emerald-200/60 bg-emerald-50 text-slate-900 font-sans shadow-[0_10px_30px_rgba(0,0,0,0.08)]";
 
     dialog.innerHTML = `
       <div class="flex flex-col relative">
@@ -34,15 +34,15 @@ class MemoraDialog {
           <div class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-emerald-700 via-emerald-600 to-lime-600 text-white rounded-t-2xl">
             <div class="w-8 h-8"></div>
             <div class="flex-1 text-center">
-              <span class="text-xs font-semibold tracking-wide uppercase text-white/70">Memora</span>
+              <span class="text-xs font-semibold tracking-wide uppercase text-white/70">Lexmora</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <button class="fav-btn group relative appearance-none border-none cursor-pointer rounded-md w-8 h-8 flex items-center justify-center transition-colors" title="Saved to Memora" aria-label="Saved to Memora">
+              <button class="fav-btn group relative appearance-none border-none cursor-pointer rounded-md w-8 h-8 flex items-center justify-center transition-colors" title="Saved to Lexmora" aria-label="Saved to Lexmora">
                 <svg class="w-5 h-5 fill-yellow-300 hover:fill-yellow-400 transition-colors" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                 </svg>
                 <div class="fav-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 text-[11px] font-medium text-white bg-black/80 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                  Word saved in Memora
+                  Word saved in Lexmora
                 </div>
               </button>
               <button class="close-btn appearance-none border-none cursor-pointer rounded-md w-8 h-8 flex items-center justify-center text-white/80 hover:text-white" title="Close">×</button>
@@ -73,11 +73,11 @@ class MemoraDialog {
             "hover:stroke-white",
             "stroke-[1.5]"
           );
-          favBtn.title = "Save to Memora";
-          if (favTooltip) favTooltip.textContent = "Save to Memora";
+          favBtn.title = "Save to Lexmora";
+          if (favTooltip) favTooltip.textContent = "Save to Lexmora";
           if (this.currentWord) {
             chrome.runtime.sendMessage({
-              type: "MEMORA_ACTION",
+              type: "LEXMORA_ACTION",
               action: "delete",
               word: this.currentWord,
             });
@@ -90,11 +90,11 @@ class MemoraDialog {
             "stroke-[1.5]"
           );
           favSvg.classList.add("fill-yellow-300", "hover:fill-yellow-400");
-          favBtn.title = "Saved to Memora";
-          if (favTooltip) favTooltip.textContent = "Word saved in Memora";
+          favBtn.title = "Saved to Lexmora";
+          if (favTooltip) favTooltip.textContent = "Word saved in Lexmora";
           if (this.currentWord) {
             chrome.runtime.sendMessage({
-              type: "MEMORA_ACTION",
+              type: "LEXMORA_ACTION",
               action: "save",
               word: this.currentWord,
               sourceUrl: location.href,
@@ -129,7 +129,7 @@ class MemoraDialog {
     this.currentWord = word;
 
     this.content.innerHTML = `
-      <div class="flex flex-col items-center gap-4 py-10 px-5 text-center memora-slide-in">
+      <div class="flex flex-col items-center gap-4 py-10 px-5 text-center lexmora-slide-in">
         <div class="w-10 h-10 border-3 border-emerald-200 border-t-emerald-700 rounded-full animate-spin"></div>
         <div class="text-base font-medium text-slate-700 leading-normal">Looking up</div>
         <div class="text-2xl font-bold text-slate-900 tracking-tight">“${this.escape(
@@ -147,7 +147,7 @@ class MemoraDialog {
     this.currentWord = word;
 
     let html = `
-      <div class="memora-slide-in">
+      <div class="lexmora-slide-in">
         <div class="px-6 pt-6 pb-3">
           <div class="flex items-center gap-3 mb-1">
             <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs">Aa</div>
@@ -179,7 +179,7 @@ class MemoraDialog {
         const animationDelay = index > 0 ? `animate-delay-${index}00` : "";
 
         html += `
-          <div class="group relative bg-white rounded-lg memora-slide-in ${animationDelay}">
+          <div class="group relative bg-white rounded-lg lexmora-slide-in ${animationDelay}">
             <div class="py-5 px-6">
               <div class="flex items-start gap-3">
                 <div class="flex-1">
@@ -224,7 +224,7 @@ class MemoraDialog {
     if (!this.content || !this.dialog) return;
 
     this.content.innerHTML = `
-      <div class="memora-slide-in">
+      <div class="lexmora-slide-in">
         <!-- Error header -->
         <div class="text-center mb-8 pb-6 border-b-2 border-red-50">
           <div class="text-5xl mb-4 opacity-80">⚠️</div>
@@ -275,10 +275,10 @@ class MemoraDialog {
   }
 }
 
-const dialog = new MemoraDialog();
+const dialog = new LexmoraDialog();
 
 chrome.runtime.onMessage.addListener((message: ModalMessage) => {
-  if (!message || message.type !== "MEMORA_MODAL") return;
+  if (!message || message.type !== "LEXMORA_MODAL") return;
   if (message.action === "loading" && message.word) {
     dialog.showLoading(message.word);
   } else if (message.action === "success" && message.word) {
@@ -301,7 +301,7 @@ function ensureShadowRoot(): ShadowRoot {
   if (shadowRootRef) return shadowRootRef;
 
   const host = document.createElement("div");
-  host.id = "memora-shadow-host";
+  host.id = "lexmora-shadow-host";
   host.style.all = "initial";
   host.style.position = "fixed";
   host.style.zIndex = "2147483647"; // top-most, dialog still uses top layer

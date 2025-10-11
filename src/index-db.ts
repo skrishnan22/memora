@@ -1,6 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from "idb";
 
-export const DB_NAME = "MemoraDB";
+export const DB_NAME = "LexmoraDB";
 export const DB_VERSION = 1;
 export const STORE_NAME = "words";
 export const INDEX_TIMESTAMP = "timestamp";
@@ -11,7 +11,7 @@ export interface WordMeaning {
   example?: string;
 }
 
-interface MemoraDB extends DBSchema {
+interface LexmoraDB extends DBSchema {
   words: {
     key: string;
     value: {
@@ -26,9 +26,9 @@ interface MemoraDB extends DBSchema {
   };
 }
 
-export type WordEntry = MemoraDB["words"]["value"];
+export type WordEntry = LexmoraDB["words"]["value"];
 
-let cachedDbConnection: IDBPDatabase<MemoraDB>;
+let cachedDbConnection: IDBPDatabase<LexmoraDB>;
 
 export async function getDb() {
   if (!cachedDbConnection) {

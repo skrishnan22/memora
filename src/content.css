@@ -25,9 +25,9 @@
     animation: backdropFadeIn 0.25s ease-out;
   }
 
-  .memora-dialog { animation: dialogSlideIn 0.22s ease-out; }
+  .lexmora-dialog { animation: dialogSlideIn 0.22s ease-out; }
 
-  .memora-slide-in { animation: slideInUp 0.25s ease-out both; }
+  .lexmora-slide-in { animation: slideInUp 0.25s ease-out both; }
 
   .animate-delay-100 { animation-delay: 0.06s; }
   .animate-delay-200 { animation-delay: 0.12s; }
@@ -61,7 +61,7 @@
   }
   
   /* Better text rendering */
-  .memora-dialog {
+  .lexmora-dialog {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
