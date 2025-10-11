@@ -78,8 +78,8 @@ chrome.runtime.onInstalled.addListener(async () => {
   console.log("Extension installed, initializing...");
 
   chrome.contextMenus.create({
-    id: "lookupInMemora",
-    title: "Lookup in Memora",
+    id: "lookupInLexmora",
+    title: "Lookup in Lexmora",
     contexts: ["selection"],
   });
   console.log("Context menu created");
@@ -88,7 +88,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   console.log("Context menu clicked:", info.menuItemId, info.selectionText);
 
-  if (info.menuItemId === "lookupInMemora" && info.selectionText) {
+  if (info.menuItemId === "lookupInLexmora" && info.selectionText) {
     try {
       const activeTabId = tab?.id;
       if (activeTabId) {

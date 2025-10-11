@@ -14,7 +14,7 @@ interface ModalMessage {
   error?: string;
 }
 
-class MemoraDialog {
+class LexmoraDialog {
   private dialog: HTMLDialogElement | null = null;
   private content: HTMLElement | null = null;
   private currentWord: string | null = null;
@@ -34,15 +34,15 @@ class MemoraDialog {
           <div class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-emerald-700 via-emerald-600 to-lime-600 text-white rounded-t-2xl">
             <div class="w-8 h-8"></div>
             <div class="flex-1 text-center">
-              <span class="text-xs font-semibold tracking-wide uppercase text-white/70">Memora</span>
+              <span class="text-xs font-semibold tracking-wide uppercase text-white/70">Lexmora</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <button class="fav-btn group relative appearance-none border-none cursor-pointer rounded-md w-8 h-8 flex items-center justify-center transition-colors" title="Saved to Memora" aria-label="Saved to Memora">
+              <button class="fav-btn group relative appearance-none border-none cursor-pointer rounded-md w-8 h-8 flex items-center justify-center transition-colors" title="Saved to Lexmora" aria-label="Saved to Lexmora">
                 <svg class="w-5 h-5 fill-yellow-300 hover:fill-yellow-400 transition-colors" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                 </svg>
                 <div class="fav-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 text-[11px] font-medium text-white bg-black/80 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                  Word saved in Memora
+                  Word saved in Lexmora
                 </div>
               </button>
               <button class="close-btn appearance-none border-none cursor-pointer rounded-md w-8 h-8 flex items-center justify-center text-white/80 hover:text-white" title="Close">×</button>
@@ -73,8 +73,8 @@ class MemoraDialog {
             "hover:stroke-white",
             "stroke-[1.5]"
           );
-          favBtn.title = "Save to Memora";
-          if (favTooltip) favTooltip.textContent = "Save to Memora";
+          favBtn.title = "Save to Lexmora";
+          if (favTooltip) favTooltip.textContent = "Save to Lexmora";
           if (this.currentWord) {
             chrome.runtime.sendMessage({
               type: "MEMORA_ACTION",
@@ -90,8 +90,8 @@ class MemoraDialog {
             "stroke-[1.5]"
           );
           favSvg.classList.add("fill-yellow-300", "hover:fill-yellow-400");
-          favBtn.title = "Saved to Memora";
-          if (favTooltip) favTooltip.textContent = "Word saved in Memora";
+          favBtn.title = "Saved to Lexmora";
+          if (favTooltip) favTooltip.textContent = "Word saved in Lexmora";
           if (this.currentWord) {
             chrome.runtime.sendMessage({
               type: "MEMORA_ACTION",
@@ -275,7 +275,7 @@ class MemoraDialog {
   }
 }
 
-const dialog = new MemoraDialog();
+const dialog = new LexmoraDialog();
 
 chrome.runtime.onMessage.addListener((message: ModalMessage) => {
   if (!message || message.type !== "MEMORA_MODAL") return;
