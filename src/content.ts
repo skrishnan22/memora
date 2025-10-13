@@ -25,14 +25,11 @@ class LexmoraDialog {
     const dialog = document.createElement("dialog");
     dialog.setAttribute("id", "lexmora-dialog");
     dialog.className =
-      "lexmora-dialog fixed inset-0 w-[min(480px,calc(100vw-40px))] max-h-[min(85vh,680px)] m-auto p-0 rounded-[2rem] bg-[#4c87cf] text-slate-900 font-sans shadow-[0_8px_30px_rgba(0,0,0,0.15)]";
+      "lexmora-dialog fixed inset-0 w-[min(480px,calc(100vw-40px))] max-h-[min(85vh,680px)] m-auto p-0 rounded-[2rem] bg-[#4c87cf] text-slate-900 shadow-[0_8px_30px_rgba(0,0,0,0.15)]";
 
     dialog.innerHTML = `
       <div class="flex flex-col relative p-[18px]">
-      <!-- Smooth top-left dog-ear -->
-      <div class="pointer-events-none absolute top-[18px] left-[18px] w-10 h-10 bg-[#4c87cf] rounded-br-[28px] z-10 shadow-[inset_0_0_2px_rgba(255,255,255,0.2)]"></div>
 
-<!-- Prominent yellow dot -->
 <div class="absolute top-[18px] left-[18px] w-5.5 h-5.5 bg-[#fae8d2] rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.15)] z-20"></div>
 
         <div class="dialog-body card-content relative bg-[#fffbea] rounded-[1.25rem] p-6 overflow-y-auto overflow-x-visible shadow-none shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]"></div>
@@ -65,6 +62,17 @@ class LexmoraDialog {
     if (e.key === "Escape") this.hide();
   };
 
+  private renderBrandHeader(): string {
+    const iconUrl = chrome.runtime.getURL("icons/icon-38.svg");
+    // Centered brand header inside the card, inspired by website branding
+    return `
+      <div class="flex items-center justify-center gap-2.5 mb-5">
+        <img src="${iconUrl}" alt="Lexmora icon" class="w-8 h-8"/>
+        <span class="text-[18px] font-semibold tracking-tight" style="color:#16615b">Lexmora</span>
+      </div>
+    `;
+  }
+
   showLoading(word: string) {
     this.initialize();
     if (!this.content || !this.dialog) return;
@@ -72,6 +80,7 @@ class LexmoraDialog {
 
     this.content.innerHTML = `
       <div class="flex flex-col items-center gap-5 py-12 px-5 text-center lexmora-slide-in">
+        ${this.renderBrandHeader()}
         <div class="w-12 h-12 border-[3px] border-[#6B9BD1]/30 border-t-[#6B9BD1] rounded-full animate-spin"></div>
         <div class="text-lg font-medium text-[#1E3A5F] leading-normal">Looking up</div>
         <div class="text-3xl font-bold text-[#1E3A5F] tracking-tight">"${this.escape(
@@ -90,6 +99,7 @@ class LexmoraDialog {
 
     let html = `
       <div class="lexmora-slide-in">
+        ${this.renderBrandHeader()}
         <div class="mb-6">
           <h2 class="text-[2.25rem] font-bold text-[#0F172A] tracking-tight leading-none m-0 mb-4">${this.escape(
             word
@@ -161,6 +171,7 @@ class LexmoraDialog {
 
     this.content.innerHTML = `
       <div class="lexmora-slide-in">
+        ${this.renderBrandHeader()}
         <div class="text-center mb-6 pb-6 border-b-2 border-[#1E3A5F]/10">
           <div class="text-5xl mb-4 opacity-80">⚠️</div>
           <div class="text-2xl font-bold text-[#D97757] mb-2 tracking-tight">
@@ -245,6 +256,26 @@ function ensureShadowRoot(): ShadowRoot {
   shadowRootRef = root;
 
   const style = document.createElement("style");
+
+  // Inject Josefin Sans font-face into the shadow root so it works under any page CSP
+  try {
+    const josefinUrl = chrome.runtime.getURL(
+      "fonts/JosefinSans-VariableFont_wght.woff"
+    );
+    const fontStyle = document.createElement("style");
+    fontStyle.textContent = `
+@font-face {
+  font-family: 'Josefin Sans';
+  src: url('${josefinUrl}') format('woff');
+  font-weight: 100 700;
+  font-style: normal;
+  font-display: swap;
+}
+`;
+    root.appendChild(fontStyle);
+  } catch (err) {
+    console.warn("Memora: failed to register Josefin Sans font", err);
+  }
 
   try {
     const cssUrl = chrome.runtime.getURL("contentStyle.css");
