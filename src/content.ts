@@ -25,17 +25,17 @@ class LexmoraDialog {
     const dialog = document.createElement("dialog");
     dialog.setAttribute("id", "lexmora-dialog");
     dialog.className =
-      "lexmora-dialog fixed inset-0 w-[min(480px,calc(100vw-40px))] max-h-[min(85vh,680px)] m-auto p-0 rounded-[2rem] bg-[#4A80c3] text-slate-900 font-sans shadow-[0_8px_30px_rgba(0,0,0,0.15)]";
+      "lexmora-dialog fixed inset-0 w-[min(480px,calc(100vw-40px))] max-h-[min(85vh,680px)] m-auto p-0 rounded-[2rem] bg-[#4c87cf] text-slate-900 font-sans shadow-[0_8px_30px_rgba(0,0,0,0.15)]";
 
     dialog.innerHTML = `
       <div class="flex flex-col relative p-[18px]">
       <!-- Smooth top-left dog-ear -->
-      <div class="pointer-events-none absolute top-[18px] left-[18px] w-10 h-10 bg-[#4A80C3] rounded-br-[28px] z-10 shadow-[inset_0_0_2px_rgba(255,255,255,0.2)]"></div>
+      <div class="pointer-events-none absolute top-[18px] left-[18px] w-10 h-10 bg-[#4c87cf] rounded-br-[28px] z-10 shadow-[inset_0_0_2px_rgba(255,255,255,0.2)]"></div>
 
 <!-- Prominent yellow dot -->
-<div class="absolute top-[18px] left-[18px] w-5.5 h-5.5 bg-[#F6D861] rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.15)] z-20"></div>
+<div class="absolute top-[18px] left-[18px] w-5.5 h-5.5 bg-[#fae8d2] rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.15)] z-20"></div>
 
-        <div class="dialog-body card-content relative bg-[#FFFEFA] rounded-[1.25rem] p-6 overflow-y-auto overflow-x-visible shadow-none shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]"></div>
+        <div class="dialog-body card-content relative bg-[#fffbea] rounded-[1.25rem] p-6 overflow-y-auto overflow-x-visible shadow-none shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]"></div>
         <button class="close-btn absolute top-[30px] right-[30px] appearance-none border-none cursor-pointer rounded-full w-10 h-10 flex items-center justify-center bg-[#F4D88F] hover:bg-[#ECC960] text-[#1E3A5F] hover:text-[#0F2642] transition-all shadow-sm z-10" title="Close">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -95,10 +95,10 @@ class LexmoraDialog {
             word
           )}</h2>
           <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-full bg-[#6B9BD1] flex items-center justify-center">
-              <span class="text-sm font-bold text-white">Aa</span>
+            <div class="w-9 h-9 rounded-full bg-[#acd4fa] flex items-center justify-center">
+              <span class="text-sm font-bold text-[#1e4ba6]">Aa</span>
             </div>
-            <span class="text-[15px] font-medium text-[#1E3A5F]">${
+            <span class="text-[15px] font-medium text-[#052e85]">${
               meanings?.length || 0
             } ${meanings?.length !== 1 ? "meanings" : "meaning"}</span>
           </div>
@@ -123,7 +123,7 @@ class LexmoraDialog {
         html += `
           <div class="lexmora-slide-in ${animationDelay}">
             <div class="mb-2.5">
-              <span class="inline-block text-[11px] font-bold uppercase bg-[#FFF5B1] text-[#1E293B] uppercase tracking-wider  px-3 py-1.5 rounded-full">${this.escape(
+              <span class="inline-block text-[11px] font-bold uppercase bg-[#ffe9a8] text-[#1E293B] uppercase tracking-wider  px-3 pl-5 pr-5 py-2 rounded-full">${this.escape(
                 m.partOfSpeech || "meaning"
               )}</span>
             </div>
