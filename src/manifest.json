@@ -13,7 +13,13 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["contentStyle.css", "icons/*", "fonts/*"],
+      "resources": [
+        "content-frame.html",
+        "frame.js",
+        "contentStyle.css",
+        "icons/*",
+        "fonts/*"
+      ],
       "matches": ["<all_urls>"]
     }
   ],
