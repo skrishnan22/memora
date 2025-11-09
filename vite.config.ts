@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
 import { viteStaticCopy } from "vite-plugin-static-copy";
+import react from "@vitejs/plugin-react";
 import type { OutputBundle } from "rollup";
 
 /* weirdly vite always keeps html files in the same dir structure as the src
@@ -13,9 +14,14 @@ function moveHtmlToRoot() {
     apply: "build" as const,
     enforce: "post" as const,
     generateBundle(_options, bundle: OutputBundle) {
-      for (const [fileName, chunk] of Object.entries(bundle)) {
-        if (fileName === "src/content-frame.html" && chunk.type === "asset") {
-          chunk.fileName = "content-frame.html";
+      for (const chunk of Object.values(bundle)) {
+        if (
+          chunk.type === "asset" &&
+          chunk.fileName.startsWith("src/") &&
+          chunk.fileName.endsWith(".html")
+        ) {
+          const segments = chunk.fileName.split("/");
+          chunk.fileName = segments[segments.length - 1] ?? chunk.fileName;
         }
       }
     },
@@ -34,6 +40,7 @@ export default defineConfig({
         content: resolve(__dirname, "src/content.ts"),
         contentStyle: resolve(__dirname, "src/content.css"),
         "content-frame": resolve(__dirname, "src/content-frame.html"),
+        review: resolve(__dirname, "src/review/review.html"),
       },
       output: {
         entryFileNames: "[name].js",
@@ -43,6 +50,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    react(),
     moveHtmlToRoot(),
     viteStaticCopy({
       targets: [
@@ -53,6 +61,7 @@ export default defineConfig({
             "!src/**/*.tsx",
             "!src/**/*.css",
             "!**/content-frame.html",
+            "!**/review.html",
           ],
           dest: ".",
         },

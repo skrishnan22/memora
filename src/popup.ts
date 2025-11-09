@@ -10,4 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initializePopup(): void {
     console.log('Initializing popup...');
+    const reviewBtn = document.getElementById('start-review');
+    if (reviewBtn) {
+        reviewBtn.addEventListener('click', () => {
+            const reviewUrl = chrome.runtime.getURL('review.html');
+            chrome.tabs.create({ url: reviewUrl });
+        });
+    }
 }
