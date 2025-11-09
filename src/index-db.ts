@@ -5,6 +5,11 @@ export const DB_VERSION = 1;
 export const STORE_NAME = "words";
 export const INDEX_TIMESTAMP = "timestamp";
 
+const DEFAULT_EASE_FACTOR = 2.5;
+const DEFAULT_INTERVAL_DAYS = 0;
+const DEFAULT_REPETITIONS = 0;
+const DEFAULT_LAPSES = 0;
+
 export interface WordMeaning {
   partOfSpeech: string;
   definition: string;
@@ -19,6 +24,11 @@ interface LexmoraDB extends DBSchema {
       timestamp: string;
       sourceUrl: string;
       meanings?: WordMeaning[];
+      easeFactor: number;
+      intervalDays: number;
+      repetitions: number;
+      nextReviewAt: string;
+      lapses: number;
     };
     indexes: {
       timestamp: string;
@@ -74,11 +84,24 @@ export async function saveWord(
 ) {
   const db = await getDb();
   const normalized = word.toLowerCase().trim();
+  const nowIso = new Date().toISOString();
+  const firstReviewDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  const existing = await db.get(STORE_NAME, normalized);
+
+  if (existing) {
+    return;
+  }
+
   const payload: WordEntry = {
     word: normalized,
-    timestamp: new Date().toISOString(),
+    timestamp: nowIso,
     sourceUrl: sourceUrl || "",
     ...(meanings?.length ? { meanings } : {}),
+    easeFactor: DEFAULT_EASE_FACTOR,
+    intervalDays: DEFAULT_INTERVAL_DAYS,
+    repetitions: DEFAULT_REPETITIONS,
+    nextReviewAt: firstReviewDate,
+    lapses: DEFAULT_LAPSES,
   };
   const tx = db.transaction(STORE_NAME, "readwrite");
   await tx.store.put(payload);

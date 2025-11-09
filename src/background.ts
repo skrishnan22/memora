@@ -16,7 +16,7 @@ interface DictionaryApiEntry {
   meanings?: DictionaryApiMeaning[];
 }
 
-async function fetchWordMeanings(word: string): Promise<WordMeaning[]> {
+async function fetchWordMeanings(word: string) {
   const normalized = word.trim().toLowerCase();
 
   if (!normalized) {
