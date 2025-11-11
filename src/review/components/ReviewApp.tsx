@@ -22,22 +22,7 @@ export const ReviewApp = () => {
       <div className="relative w-full max-w-7xl flex-1 flex flex-col gap-6 px-4 sm:px-6">
         {/* Header */}
         <div className="max-w-6xl mx-auto mb-6 w-full">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-900">Vocab Trainer</h1>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600 font-medium">
-                Session 1
-              </span>
-              <button className="text-gray-600 hover:text-gray-800 transition-colors">
-                <Settings size={24} />
-              </button>
-              <img
-                src="https://i.pravatar.cc/150?img=5"
-                alt="User avatar"
-                className="w-10 h-10 rounded-full border-2 border-white shadow-sm"
-              />
-            </div>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900">Vocab Trainer</h1>
         </div>
 
         {/* Stats Cards */}
@@ -70,10 +55,6 @@ export const ReviewApp = () => {
           </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="max-w-6xl mx-auto mb-6 flex justify-center w-full">
-          <ProgressBar current={3} total={10} />
-        </div>
 
         {/* Vocab Card with Side Images */}
         <div className="max-w-6xl mx-auto flex justify-center items-center mb-4 w-full flex-1 relative">
