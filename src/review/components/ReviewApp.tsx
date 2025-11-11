@@ -3,8 +3,6 @@ import { StatCard } from './StatCard';
 import { ProgressBar } from './ProgressBar';
 import { VocabCard } from './VocabCard';
 import { ActionButtons } from './ActionButtons';
-import { DecorativeIcons } from './DecorativeIcons';
-import learningImage from '../../assets/image.png';
 
 export const ReviewApp = () => {
   const handleReviewAgain = () => {
@@ -16,12 +14,9 @@ export const ReviewApp = () => {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-orange-50 relative overflow-hidden flex flex-col">
-      {/* Decorative Background Icons */}
-      <DecorativeIcons />
-
+    <div className="h-screen bg-white relative overflow-hidden flex flex-col">
       {/* Main Content */}
-      <div className="relative z-10 px-6 py-6 flex-1 flex flex-col">
+      <div className="relative px-6 py-6 flex-1 flex flex-col">
         {/* Header */}
         <div className="max-w-6xl mx-auto mb-6 w-full">
           <div className="flex items-center justify-between">
@@ -75,32 +70,13 @@ export const ReviewApp = () => {
           <ProgressBar current={3} total={10} />
         </div>
 
-        {/* Vocab Card with Side Image */}
-        <div className="max-w-6xl mx-auto flex justify-center items-center gap-8 mb-4 w-full flex-1">
-          {/* Left Side Image */}
-          <div className="hidden lg:block flex-shrink-0">
-            <img 
-              src={learningImage} 
-              alt="Learning illustration"
-              className="w-64 h-64 object-contain opacity-80 hover:opacity-100 transition-opacity duration-300"
-            />
-          </div>
-
-          {/* Vocab Card */}
+        {/* Vocab Card */}
+        <div className="max-w-6xl mx-auto flex justify-center items-center mb-4 w-full flex-1">
           <VocabCard
             word="Ephemeral"
             meaning="Lasting for a very short time; transitory"
             category="Adjective"
           />
-
-          {/* Right Side Image (mirrored) */}
-          <div className="hidden lg:block flex-shrink-0">
-            <img 
-              src={learningImage} 
-              alt="Learning illustration"
-              className="w-64 h-64 object-contain opacity-80 hover:opacity-100 transition-opacity duration-300 scale-x-[-1]"
-            />
-          </div>
         </div>
 
         {/* Action Buttons */}
