@@ -11,7 +11,7 @@ export const VocabCard = ({ word, meaning, category }: VocabCardProps) => {
   const [isRevealed, setIsRevealed] = useState(false);
 
   return (
-    <div className="relative bg-white rounded-3xl shadow-xl border-4 border-orange-400 p-8 max-w-2xl w-full">
+    <div className="relative rounded-3xl shadow-xl border-4 border-orange-400 p-8 max-w-2xl w-full" style={{ backgroundColor: '#fffdf4' }}>
       {/* Category Badge */}
       <div className="absolute top-6 right-6 flex items-center gap-2">
         <span className="bg-orange-100 text-orange-600 px-4 py-1.5 rounded-full text-sm font-medium">

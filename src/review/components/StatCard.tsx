@@ -9,7 +9,7 @@ interface StatCardProps {
 
 export const StatCard = ({ icon, value, label, iconColor }: StatCardProps) => {
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col items-center gap-2 min-w-[140px]">
+    <div className="rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col items-center gap-2 min-w-[140px]" style={{ backgroundColor: '#f9f6ea' }}>
       <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${iconColor}`}>
         {icon}
       </div>

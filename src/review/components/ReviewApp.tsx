@@ -1,33 +1,38 @@
-import { FileText, Eye, CircleCheck, Flame, Settings } from 'lucide-react';
-import { StatCard } from './StatCard';
-import { ProgressBar } from './ProgressBar';
-import { VocabCard } from './VocabCard';
-import { ActionButtons } from './ActionButtons';
+import { FileText, Eye, CircleCheck, Flame, Settings } from "lucide-react";
+import type { FC } from "react";
+import { StatCard } from "./StatCard";
+import { ProgressBar } from "./ProgressBar";
+import { VocabCard } from "./VocabCard";
+import { ActionButtons } from "./ActionButtons";
+import imageLeft from "../../../src/assets/image.png";
+import imageRight from "../../../src/assets/vector-image-1.png";
 
 export const ReviewApp = () => {
   const handleReviewAgain = () => {
-    console.log('Review again clicked');
+    console.log("Review again clicked");
   };
 
   const handleGotIt = () => {
-    console.log('Got it clicked');
+    console.log("Got it clicked");
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col items-center px-4 py-10">
+    <div className="min-h-screen relative flex flex-col items-center px-4 py-10 overflow-y-auto">
       {/* Main Content */}
-      <div className="relative w-full max-w-6xl flex-1 flex flex-col gap-6 px-4 sm:px-6">
+      <div className="relative w-full max-w-7xl flex-1 flex flex-col gap-6 px-4 sm:px-6">
         {/* Header */}
         <div className="max-w-6xl mx-auto mb-6 w-full">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-gray-900">Vocab Trainer</h1>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600 font-medium">Session 1</span>
+              <span className="text-sm text-gray-600 font-medium">
+                Session 1
+              </span>
               <button className="text-gray-600 hover:text-gray-800 transition-colors">
                 <Settings size={24} />
               </button>
-              <img 
-                src="https://i.pravatar.cc/150?img=5" 
+              <img
+                src="https://i.pravatar.cc/150?img=5"
                 alt="User avatar"
                 className="w-10 h-10 rounded-full border-2 border-white shadow-sm"
               />
@@ -70,13 +75,34 @@ export const ReviewApp = () => {
           <ProgressBar current={3} total={10} />
         </div>
 
-        {/* Vocab Card */}
-        <div className="max-w-6xl mx-auto flex justify-center items-center mb-4 w-full flex-1">
-          <VocabCard
-            word="Ephemeral"
-            meaning="Lasting for a very short time; transitory"
-            category="Adjective"
-          />
+        {/* Vocab Card with Side Images */}
+        <div className="max-w-6xl mx-auto flex justify-center items-center mb-4 w-full flex-1 relative">
+          {/* Left Image - positioned offset to top-left */}
+          <div className="hidden lg:block absolute left-0 top-0 -translate-x-8 -translate-y-12">
+            <img
+              src={imageLeft}
+              alt="Decorative illustration"
+              className="w-48 h-auto object-contain opacity-85"
+            />
+          </div>
+
+          {/* Main Vocab Card */}
+          <div className="w-full max-w-2xl z-10">
+            <VocabCard
+              word="Ephemeral"
+              meaning="Lasting for a very short time; transitory"
+              category="Adjective"
+            />
+          </div>
+
+          {/* Right Image - positioned offset to top-right */}
+          <div className="hidden lg:block absolute right-0 top-0 translate-x-8 -translate-y-12">
+            <img
+              src={imageRight}
+              alt="Decorative illustration"
+              className="w-48 h-auto object-contain opacity-85"
+            />
+          </div>
         </div>
 
         {/* Action Buttons */}
