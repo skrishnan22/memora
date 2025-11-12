@@ -7,17 +7,17 @@ interface ActionButtonsProps {
 
 export const ActionButtons = ({ onReviewAgain, onGotIt }: ActionButtonsProps) => {
   return (
-    <div className="flex gap-4">
+    <div className="flex flex-col sm:flex-row gap-4">
       <button
         onClick={onReviewAgain}
-        className="flex items-center gap-2 px-8 py-3.5 bg-white border-2 border-red-300 text-red-500 rounded-2xl font-semibold hover:bg-red-50 transition-colors shadow-sm"
+        className="flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl font-semibold text-sky-600 border border-sky-100 bg-white/80 shadow-sm hover:-translate-y-0.5 hover:bg-white transition-all duration-300"
       >
         <RotateCcw size={20} />
         Review Again
       </button>
       <button
         onClick={onGotIt}
-        className="flex items-center gap-2 px-8 py-3.5 bg-emerald-500 text-white rounded-2xl font-semibold hover:bg-emerald-600 transition-colors shadow-sm"
+        className="flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl font-semibold text-white bg-gradient-to-r from-sky-500 to-blue-600 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all duration-300 hover:-translate-y-0.5"
       >
         <CircleCheck size={20} />
         Got it!

@@ -1,11 +1,9 @@
-import { FileText, Eye, CircleCheck, Flame, Settings } from "lucide-react";
-import type { FC } from "react";
+import { BookOpen, CheckCircle2, Eye, Flame } from "lucide-react";
 import { StatCard } from "./StatCard";
-import { ProgressBar } from "./ProgressBar";
 import { VocabCard } from "./VocabCard";
 import { ActionButtons } from "./ActionButtons";
-import imageLeft from "../../../src/assets/image.png";
-import imageRight from "../../../src/assets/vector-image-1.png";
+import imageLeft from "../../assets/image.png";
+import imageRight from "../../assets/vector-image-1.png";
 
 export const ReviewApp = () => {
   const handleReviewAgain = () => {
@@ -18,57 +16,67 @@ export const ReviewApp = () => {
 
   return (
     <div className="min-h-screen relative flex flex-col items-center px-4 py-10 overflow-y-auto">
-      {/* Main Content */}
-      <div className="relative w-full max-w-7xl flex-1 flex flex-col gap-6 px-4 sm:px-6">
+      <div className="relative w-full max-w-7xl flex-1 flex flex-col gap-10 px-4 sm:px-6">
         {/* Header */}
-        <div className="max-w-6xl mx-auto mb-6 w-full">
-          <h1 className="text-3xl font-bold text-gray-900">Vocab Trainer</h1>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+              Session 1
+            </p>
+            <h1 className="text-4xl sm:text-5xl font-semibold text-slate-900 tracking-tight">
+              Vocab Trainer
+            </h1>
+            <p className="text-slate-500">
+              Keep the streak alive with a focused micro-session.
+            </p>
+          </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="max-w-6xl mx-auto mb-6 w-full">
+        {/* Stats + Progress */}
+        <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
-              icon={<FileText size={20} />}
+              icon={<BookOpen size={20} className="text-amber-500" />}
               value={50}
               label="Total Words"
-              iconColor="bg-orange-100 text-orange-500"
+              accentClass="text-amber-500"
+              iconWrapperClass="bg-amber-50 text-amber-500"
             />
             <StatCard
-              icon={<Eye size={20} />}
+              icon={<Eye size={20} className="text-sky-500" />}
               value={30}
               label="Reviewed"
-              iconColor="bg-cyan-100 text-cyan-500"
+              accentClass="text-sky-500"
+              iconWrapperClass="bg-sky-50 text-sky-500"
             />
             <StatCard
-              icon={<CircleCheck size={20} />}
+              icon={<CheckCircle2 size={20} className="text-emerald-500" />}
               value={25}
               label="Mastered"
-              iconColor="bg-emerald-100 text-emerald-500"
+              accentClass="text-emerald-500"
+              iconWrapperClass="bg-emerald-50 text-emerald-500"
             />
             <StatCard
-              icon={<Flame size={20} />}
+              icon={<Flame size={20} className="text-rose-500" />}
               value={7}
               label="Day Streak"
-              iconColor="bg-orange-100 text-orange-500"
+              accentClass="text-rose-500"
+              iconWrapperClass="bg-rose-50 text-rose-500"
             />
           </div>
         </div>
 
-
         {/* Vocab Card with Side Images */}
-        <div className="max-w-6xl mx-auto flex justify-center items-center mb-4 w-full flex-1 relative">
-          {/* Left Image - positioned offset to top-left */}
-          <div className="hidden lg:block absolute left-0 top-0 -translate-x-8 -translate-y-12">
+        <div className="max-w-6xl mx-auto flex justify-center items-center w-full flex-1 relative">
+          <div className="hidden lg:block absolute left-0 top-12 -translate-x-24 pointer-events-none">
             <img
               src={imageLeft}
               alt="Decorative illustration"
-              className="w-48 h-auto object-contain opacity-85"
+              className="w-48 h-auto object-contain opacity-80"
             />
           </div>
 
-          {/* Main Vocab Card */}
-          <div className="w-full max-w-2xl z-10">
+          <div className="w-full max-w-4xl z-10">
             <VocabCard
               word="Ephemeral"
               meaning="Lasting for a very short time; transitory"
@@ -76,18 +84,17 @@ export const ReviewApp = () => {
             />
           </div>
 
-          {/* Right Image - positioned offset to top-right */}
-          <div className="hidden lg:block absolute right-0 top-0 translate-x-8 -translate-y-12">
+          <div className="hidden lg:block absolute right-0 top-2 translate-x-24 pointer-events-none">
             <img
               src={imageRight}
               alt="Decorative illustration"
-              className="w-48 h-auto object-contain opacity-85"
+              className="w-48 h-auto object-contain opacity-80"
             />
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="max-w-6xl mx-auto flex justify-center w-full mb-4">
+        <div className="flex justify-center">
           <ActionButtons
             onReviewAgain={handleReviewAgain}
             onGotIt={handleGotIt}

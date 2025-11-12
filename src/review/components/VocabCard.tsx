@@ -1,4 +1,4 @@
-import { Languages, Bookmark } from "lucide-react";
+import { Bookmark, Sparkles } from "lucide-react";
 import { useState } from "react";
 
 interface VocabCardProps {
@@ -11,44 +11,46 @@ export const VocabCard = ({ word, meaning, category }: VocabCardProps) => {
   const [isRevealed, setIsRevealed] = useState(false);
 
   return (
-    <div className="relative rounded-3xl shadow-xl border-4 border-orange-400 p-8 max-w-2xl w-full" style={{ backgroundColor: '#fffdf4' }}>
-      {/* Category Badge */}
-      <div className="absolute top-6 right-6 flex items-center gap-2">
-        <span className="bg-orange-100 text-orange-600 px-4 py-1.5 rounded-full text-sm font-medium">
-          {category}
-        </span>
-        <button className="text-orange-500 hover:text-orange-600 transition-colors">
-          <Bookmark size={20} fill="currentColor" />
+    <div className="relative w-full rounded-[32px] border border-slate-100/80 bg-gradient-to-br from-[#f5fbff] via-white to-[#eef6ff] backdrop-blur-xl px-8 sm:px-12 py-12 sm:py-16 transition-transform duration-500 hover:-translate-y-0.5">
+
+      {/* Category + bookmark */}
+      <div className="relative z-10 flex items-center justify-between mb-10">
+        <div className="flex items-center gap-3">
+          <div className="w-14 h-14 rounded-2xl bg-sky-100/70 flex items-center justify-center text-sky-600">
+            <Sparkles size={28} />
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+              Word Focus
+            </p>
+            <p className="text-lg font-semibold text-slate-900">{category}</p>
+          </div>
+        </div>
+        <button className="p-3 rounded-2xl bg-white/80 border border-blue-100 text-slate-400 hover:text-slate-600 transition-colors shadow-sm">
+          <Bookmark size={18} />
         </button>
       </div>
 
-      {/* Language Icon */}
-      <div className="flex justify-center mb-6">
-        <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center">
-          <Languages size={28} className="text-orange-500" />
-        </div>
-      </div>
-
       {/* Word */}
-      <div className="text-center mb-4">
-        <h2 className="text-5xl font-bold text-orange-500 mb-3 tracking-tight">
+      <div className="relative z-10 text-center mb-8">
+        <h2 className="text-5xl sm:text-6xl md:text-7xl font-semibold text-slate-900 tracking-tight mb-6">
           {word}
         </h2>
-        <div className="h-1 w-32 bg-orange-400 mx-auto rounded-full" />
+        <div className="w-32 md:w-40 h-1.5 mx-auto rounded-full bg-gradient-to-r from-sky-400 to-blue-600" />
       </div>
 
       {/* Meaning Reveal */}
-      <div className="text-center">
+      <div className="relative z-10 text-center">
         {!isRevealed ? (
           <button
             onClick={() => setIsRevealed(true)}
-            className="text-gray-500 text-sm flex items-center gap-2 mx-auto hover:text-gray-700 transition-colors"
+            className="inline-flex items-center gap-3 text-slate-500 text-base font-medium hover:text-slate-700 transition-colors"
           >
-            <span className="text-lg">👆</span>
+            <span className="text-xl">👆</span>
             Click to reveal meaning
           </button>
         ) : (
-          <p className="text-gray-700 text-lg font-medium animate-fade-in">
+          <p className="text-2xl font-semibold text-slate-700 leading-snug">
             {meaning}
           </p>
         )}
