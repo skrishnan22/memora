@@ -11,7 +11,7 @@ export const VocabCard = ({ word, meaning, category }: VocabCardProps) => {
   const [isRevealed, setIsRevealed] = useState(false);
 
   return (
-    <div className="relative w-full rounded-[32px] border border-slate-100/80 bg-gradient-to-br from-[#f5fbff] via-white to-[#eef6ff] backdrop-blur-xl px-8 sm:px-12 py-12 sm:py-16 transition-transform duration-500 hover:-translate-y-0.5">
+    <div className="relative w-full rounded-[32px] border border-[#a6c8ff] bg-gradient-to-br from-[#f5fbff] via-white to-[#eef6ff] backdrop-blur-xl px-8 sm:px-12 py-12 sm:py-16 transition-transform duration-500 hover:-translate-y-0.5">
 
       {/* Category + bookmark */}
       <div className="relative z-10 flex items-center justify-between mb-10">

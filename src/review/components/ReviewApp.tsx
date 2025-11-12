@@ -4,6 +4,7 @@ import { VocabCard } from "./VocabCard";
 import { ActionButtons } from "./ActionButtons";
 import imageLeft from "../../assets/image.png";
 import imageRight from "../../assets/vector-image-1.png";
+import lexmoraIcon from "../../assets/lexmora-icon.svg";
 
 export const ReviewApp = () => {
   const handleReviewAgain = () => {
@@ -16,19 +17,20 @@ export const ReviewApp = () => {
 
   return (
     <div className="min-h-screen relative flex flex-col items-center px-4 py-10 overflow-y-auto">
-      <div className="relative w-full max-w-7xl flex-1 flex flex-col gap-10 px-4 sm:px-6">
+      <div className="relative z-10 w-full max-w-7xl flex-1 flex flex-col gap-10 px-4 sm:px-6">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-              Session 1
-            </p>
-            <h1 className="text-4xl sm:text-5xl font-semibold text-slate-900 tracking-tight">
-              Vocab Trainer
-            </h1>
-            <p className="text-slate-500">
-              Keep the streak alive with a focused micro-session.
-            </p>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-3">
+              <img
+                src={lexmoraIcon}
+                alt="Lexmora logo"
+                className="w-10 h-10 drop-shadow-sm"
+              />
+              <span className="text-3xl sm:text-4xl font-semibold tracking-tight" style={{ color: "#16615b" }}>
+                Lexmora
+              </span>
+            </div>
           </div>
         </div>
 

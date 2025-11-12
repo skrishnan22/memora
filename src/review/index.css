@@ -7,8 +7,6 @@
 @layer base {
   body {
     --grid-size: 90px;
-    --tile-size: var(--grid-size);
-    --tile-offset: 0px;
     font-family: 'Satoshi', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -21,67 +19,6 @@
     background-size: var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size);
     position: relative;
     overflow-x: hidden;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background-image:
-      linear-gradient(#ffe4e6 0 0),
-      linear-gradient(#e0f2fe 0 0),
-      linear-gradient(#d9f99d 0 0),
-      linear-gradient(#fef3c7 0 0),
-      linear-gradient(#ede9fe 0 0),
-      linear-gradient(#fecdd3 0 0),
-      linear-gradient(#e0e7ff 0 0),
-      linear-gradient(#f5d0fe 0 0),
-      linear-gradient(#bbf7d0 0 0),
-      linear-gradient(#fee2e2 0 0),
-      linear-gradient(#cffafe 0 0),
-      linear-gradient(#fef9c3 0 0),
-      linear-gradient(#e9d5ff 0 0),
-      linear-gradient(#dcfce7 0 0),
-      linear-gradient(#fde68a 0 0),
-      linear-gradient(#c7d2fe 0 0);
-    background-size:
-      var(--tile-size) var(--tile-size),
-      var(--tile-size) var(--tile-size),
-      var(--tile-size) var(--tile-size),
-      var(--tile-size) var(--tile-size),
-      var(--tile-size) var(--tile-size),
-      var(--tile-size) var(--tile-size),
-      var(--tile-size) var(--tile-size),
-      var(--tile-size) var(--tile-size),
-      var(--tile-size) var(--tile-size),
-      var(--tile-size) var(--tile-size),
-      var(--tile-size) var(--tile-size),
-      var(--tile-size) var(--tile-size),
-      var(--tile-size) var(--tile-size),
-      var(--tile-size) var(--tile-size),
-      var(--tile-size) var(--tile-size),
-      var(--tile-size) var(--tile-size);
-    background-position:
-      calc(var(--grid-size) * -1 + var(--tile-offset)) calc(var(--grid-size) * 1 + var(--tile-offset)),
-      calc(var(--grid-size) * 1 + var(--tile-offset)) calc(var(--grid-size) * 4 + var(--tile-offset)),
-      calc(var(--grid-size) * 3 + var(--tile-offset)) calc(var(--grid-size) * 0 + var(--tile-offset)),
-      calc(var(--grid-size) * 5 + var(--tile-offset)) calc(var(--grid-size) * 3 + var(--tile-offset)),
-      calc(var(--grid-size) * 7 + var(--tile-offset)) calc(var(--grid-size) * 1 + var(--tile-offset)),
-      calc(var(--grid-size) * 9 + var(--tile-offset)) calc(var(--grid-size) * 4 + var(--tile-offset)),
-      calc(var(--grid-size) * 11 + var(--tile-offset)) calc(var(--grid-size) * 2 + var(--tile-offset)),
-      calc(var(--grid-size) * 13 + var(--tile-offset)) calc(var(--grid-size) * 5 + var(--tile-offset)),
-      calc(var(--grid-size) * 2 + var(--tile-offset)) calc(var(--grid-size) * 7 + var(--tile-offset)),
-      calc(var(--grid-size) * 4 + var(--tile-offset)) calc(var(--grid-size) * 9 + var(--tile-offset)),
-      calc(var(--grid-size) * 6 + var(--tile-offset)) calc(var(--grid-size) * 7 + var(--tile-offset)),
-      calc(var(--grid-size) * 8 + var(--tile-offset)) calc(var(--grid-size) * 9 + var(--tile-offset)),
-      calc(var(--grid-size) * 10 + var(--tile-offset)) calc(var(--grid-size) * 11 + var(--tile-offset)),
-      calc(var(--grid-size) * 12 + var(--tile-offset)) calc(var(--grid-size) * 8 + var(--tile-offset)),
-      calc(var(--grid-size) * 14 + var(--tile-offset)) calc(var(--grid-size) * 10 + var(--tile-offset)),
-      calc(var(--grid-size) * 0 + var(--tile-offset)) calc(var(--grid-size) * 6 + var(--tile-offset));
-    background-repeat: no-repeat;
-    opacity: 0.7;
-    z-index: 0;
   }
 
   #root {
