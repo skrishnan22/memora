@@ -5,8 +5,15 @@ import { ActionButtons } from "./ActionButtons";
 import imageLeft from "../../assets/image.png";
 import imageRight from "../../assets/vector-image-1.png";
 import lexmoraIcon from "../../assets/lexmora-icon.svg";
+import { useReviewMetrics } from "../hooks/useReviewMetrics";
 
 export const ReviewApp = () => {
+  const { metrics, isLoading, error } = useReviewMetrics();
+  const totalWords = metrics?.totalWords ?? 0;
+  const reviewedToday = metrics?.reviewedToday ?? 0;
+  const masteredWords = metrics?.masteredWords ?? 0;
+  const streakDays = metrics?.streakDays ?? 0;
+
   const handleReviewAgain = () => {
     console.log("Review again clicked");
   };
@@ -36,34 +43,43 @@ export const ReviewApp = () => {
 
         {/* Stats + Progress */}
         <div className="space-y-6">
+          {error ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+              {error}
+            </div>
+          ) : null}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               icon={<BookOpen size={20} className="text-amber-500" />}
-              value={50}
+              value={totalWords}
               label="Total Words"
               accentClass="text-amber-500"
               iconWrapperClass="bg-amber-50 text-amber-500"
+              isLoading={isLoading}
             />
             <StatCard
               icon={<Eye size={20} className="text-sky-500" />}
-              value={30}
-              label="Reviewed"
+              value={reviewedToday}
+              label="Reviewed Today"
               accentClass="text-sky-500"
               iconWrapperClass="bg-sky-50 text-sky-500"
+              isLoading={isLoading}
             />
             <StatCard
               icon={<CheckCircle2 size={20} className="text-emerald-500" />}
-              value={25}
+              value={masteredWords}
               label="Mastered"
               accentClass="text-emerald-500"
               iconWrapperClass="bg-emerald-50 text-emerald-500"
+              isLoading={isLoading}
             />
             <StatCard
               icon={<Flame size={20} className="text-rose-500" />}
-              value={7}
+              value={streakDays}
               label="Day Streak"
               accentClass="text-rose-500"
               iconWrapperClass="bg-rose-50 text-rose-500"
+              isLoading={isLoading}
             />
           </div>
         </div>

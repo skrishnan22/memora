@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 
 interface StatCardProps {
   icon: ReactNode;
@@ -6,6 +6,7 @@ interface StatCardProps {
   label: string;
   accentClass: string;
   iconWrapperClass: string;
+  isLoading?: boolean;
 }
 
 export const StatCard = ({
@@ -14,7 +15,10 @@ export const StatCard = ({
   label,
   accentClass,
   iconWrapperClass,
+  isLoading = false,
 }: StatCardProps) => {
+  const formattedValue = value.toLocaleString();
+
   return (
     <div className="group rounded-2xl px-5 py-4 border border-white/60 bg-white/80 backdrop-blur-sm shadow-[0_18px_35px_rgba(15,23,42,0.08)] flex items-center justify-between gap-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_rgba(15,23,42,0.12)]">
       <div className="flex items-center gap-3">
@@ -25,9 +29,13 @@ export const StatCard = ({
           {label}
         </p>
       </div>
-      <div className={`text-3xl font-semibold tracking-tight ${accentClass}`}>
-        {value}
-      </div>
+      {isLoading ? (
+        <div className="h-8 w-16 rounded-xl bg-slate-200 animate-pulse" />
+      ) : (
+        <div className={`text-3xl font-semibold tracking-tight ${accentClass}`}>
+          {formattedValue}
+        </div>
+      )}
     </div>
   );
 };
