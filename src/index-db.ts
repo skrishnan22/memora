@@ -132,80 +132,23 @@ export async function clearAllWords() {
   await tx.done;
 }
 
-const MS_IN_DAY = 24 * 60 * 60 * 1000;
-
 export interface ReviewMetrics {
   totalWords: number;
-  reviewedToday: number;
+  inReviewWords: number;
   masteredWords: number;
-  streakDays: number;
-}
-
-function parseDate(value?: string | null) {
-  if (!value) {
-    return null;
-  }
-
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function getDayKey(date: Date) {
-  const normalized = new Date(date);
-  normalized.setHours(0, 0, 0, 0);
-  return normalized.getTime();
-}
-
-function calculateActivityStreak(
-  activityDayKeys: Set<number>,
-  referenceDate = new Date()
-) {
-  let streak = 0;
-  let cursor = getDayKey(referenceDate);
-
-  while (activityDayKeys.has(cursor)) {
-    streak += 1;
-    cursor -= MS_IN_DAY;
-  }
-
-  return streak;
 }
 
 export async function getReviewMetrics(): Promise<ReviewMetrics> {
   const db = await getDb();
-  const entries = await db.getAll(STORE_NAME);
-
-  const totalWords = entries.length;
-  let masteredWords = 0;
-  let reviewedToday = 0;
-
-  const activityDayKeys = new Set<number>();
-  const todayKey = getDayKey(new Date());
-
-  for (const entry of entries) {
-    if (entry.isMastered) {
-      masteredWords += 1;
-    }
-
-    const activityDate = parseDate(entry.masteredAt ?? entry.timestamp);
-    if (!activityDate) {
-      continue;
-    }
-
-    const activityKey = getDayKey(activityDate);
-    activityDayKeys.add(activityKey);
-
-    if (activityKey === todayKey) {
-      reviewedToday += 1;
-    }
-  }
-
-  const streakDays = calculateActivityStreak(activityDayKeys);
+  const [totalWords, masteredWords] = await Promise.all([
+    db.count(STORE_NAME),
+    db.countFromIndex(STORE_NAME, INDEX_IS_MASTERED, IDBKeyRange.only(true)),
+  ]);
+  const inReviewWords = Math.max(0, totalWords - masteredWords);
 
   return {
     totalWords,
-    reviewedToday,
     masteredWords,
-    streakDays,
+    inReviewWords,
   };
 }

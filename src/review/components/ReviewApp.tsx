@@ -9,10 +9,6 @@ import { useReviewMetrics } from "../hooks/useReviewMetrics";
 
 export const ReviewApp = () => {
   const { metrics, isLoading, error } = useReviewMetrics();
-  const totalWords = metrics?.totalWords ?? 0;
-  const reviewedToday = metrics?.reviewedToday ?? 0;
-  const masteredWords = metrics?.masteredWords ?? 0;
-  const streakDays = metrics?.streakDays ?? 0;
 
   const handleReviewAgain = () => {
     console.log("Review again clicked");
@@ -51,7 +47,7 @@ export const ReviewApp = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               icon={<BookOpen size={20} className="text-amber-500" />}
-              value={totalWords}
+              value={metrics?.totalWords ?? 0}
               label="Total Words"
               accentClass="text-amber-500"
               iconWrapperClass="bg-amber-50 text-amber-500"
@@ -59,15 +55,15 @@ export const ReviewApp = () => {
             />
             <StatCard
               icon={<Eye size={20} className="text-sky-500" />}
-              value={reviewedToday}
-              label="Reviewed Today"
+              value={metrics?.inReviewWords ?? 0}
+              label="In Review"
               accentClass="text-sky-500"
               iconWrapperClass="bg-sky-50 text-sky-500"
               isLoading={isLoading}
             />
             <StatCard
               icon={<CheckCircle2 size={20} className="text-emerald-500" />}
-              value={masteredWords}
+              value={metrics?.masteredWords ?? 0}
               label="Mastered"
               accentClass="text-emerald-500"
               iconWrapperClass="bg-emerald-50 text-emerald-500"
@@ -75,11 +71,10 @@ export const ReviewApp = () => {
             />
             <StatCard
               icon={<Flame size={20} className="text-rose-500" />}
-              value={streakDays}
+              value={7}
               label="Day Streak"
               accentClass="text-rose-500"
               iconWrapperClass="bg-rose-50 text-rose-500"
-              isLoading={isLoading}
             />
           </div>
         </div>
