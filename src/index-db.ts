@@ -30,7 +30,7 @@ interface LexmoraDB extends DBSchema {
       repetitions: number;
       nextReviewAt: string;
       lapses: number;
-      isMastered: boolean;
+      isMastered: number;
       masteredAt?: string | null;
     };
     indexes: {
@@ -109,7 +109,7 @@ export async function saveWord(
     repetitions: DEFAULT_REPETITIONS,
     nextReviewAt: firstReviewDate,
     lapses: DEFAULT_LAPSES,
-    isMastered: false,
+    isMastered: 0,
     masteredAt: null,
   };
   const tx = db.transaction(STORE_NAME, "readwrite");
@@ -142,7 +142,7 @@ export async function getReviewMetrics(): Promise<ReviewMetrics> {
   const db = await getDb();
   const [totalWords, masteredWords] = await Promise.all([
     db.count(STORE_NAME),
-    db.countFromIndex(STORE_NAME, INDEX_IS_MASTERED, IDBKeyRange.only(true)),
+    db.countFromIndex(STORE_NAME, INDEX_IS_MASTERED, IDBKeyRange.only(1)),
   ]);
   const inReviewWords = Math.max(0, totalWords - masteredWords);
 
@@ -151,4 +151,23 @@ export async function getReviewMetrics(): Promise<ReviewMetrics> {
     masteredWords,
     inReviewWords,
   };
+}
+
+export async function getDueReviewWords(limit?: number): Promise<WordEntry[]> {
+  const db = await getDb();
+  const words = await db.getAll(STORE_NAME);
+  const nowIso = new Date().toISOString();
+  const getTime = (value?: string) => {
+    if (!value) {
+      return 0;
+    }
+    const time = new Date(value).getTime();
+    return Number.isNaN(time) ? 0 : time;
+  };
+
+  const dueWords = words
+    .filter((entry) => !entry.nextReviewAt || entry.nextReviewAt <= nowIso)
+    .sort((a, b) => getTime(a.nextReviewAt) - getTime(b.nextReviewAt));
+
+  return typeof limit === "number" ? dueWords.slice(0, limit) : dueWords;
 }

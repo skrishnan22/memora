@@ -1,15 +1,20 @@
 import { Bookmark, Sparkles } from "lucide-react";
-import { useState } from "react";
 
 interface VocabCardProps {
   word: string;
   meaning: string;
   category: string;
+  isRevealed: boolean;
+  onReveal: () => void;
 }
 
-export const VocabCard = ({ word, meaning, category }: VocabCardProps) => {
-  const [isRevealed, setIsRevealed] = useState(false);
-
+export const VocabCard = ({
+  word,
+  meaning,
+  category,
+  isRevealed,
+  onReveal,
+}: VocabCardProps) => {
   return (
     <div className="relative w-full rounded-[32px] border border-[#a6c8ff] bg-gradient-to-br from-[#f5fbff] via-white to-[#eef6ff] backdrop-blur-xl px-8 sm:px-12 py-12 sm:py-16 transition-transform duration-500 hover:-translate-y-0.5">
 
@@ -43,7 +48,7 @@ export const VocabCard = ({ word, meaning, category }: VocabCardProps) => {
       <div className="relative z-10 text-center">
         {!isRevealed ? (
           <button
-            onClick={() => setIsRevealed(true)}
+            onClick={onReveal}
             className="inline-flex items-center gap-3 text-slate-500 text-base font-medium hover:text-slate-700 transition-colors"
           >
             <span className="text-xl">👆</span>

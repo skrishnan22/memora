@@ -6,16 +6,28 @@ import imageLeft from "../../assets/image.png";
 import imageRight from "../../assets/vector-image-1.png";
 import lexmoraIcon from "../../assets/lexmora-icon.svg";
 import { useReviewMetrics } from "../hooks/useReviewMetrics";
+import { useReviewSession } from "../hooks/useReviewSession";
 
 export const ReviewApp = () => {
   const { metrics, isLoading, error } = useReviewMetrics();
+  const {
+    activeWord,
+    isMeaningRevealed,
+    isLoading: isSessionLoading,
+    error: sessionError,
+    revealMeaning,
+    goToNext,
+  } = useReviewSession();
+  const disableActions = isSessionLoading || !activeWord;
 
   const handleReviewAgain = () => {
     console.log("Review again clicked");
+    goToNext();
   };
 
   const handleGotIt = () => {
     console.log("Got it clicked");
+    goToNext();
   };
 
   return (
@@ -90,11 +102,28 @@ export const ReviewApp = () => {
           </div>
 
           <div className="w-full max-w-4xl z-10">
-            <VocabCard
-              word="Ephemeral"
-              meaning="Lasting for a very short time; transitory"
-              category="Adjective"
-            />
+            {sessionError ? (
+              <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                {sessionError}
+              </div>
+            ) : null}
+            {isSessionLoading ? (
+              <CardSkeleton />
+            ) : activeWord ? (
+              <VocabCard
+                word={activeWord.word}
+                meaning={
+                  activeWord.meanings?.[0]?.definition ?? "No meaning saved yet."
+                }
+                category={
+                  activeWord.meanings?.[0]?.partOfSpeech ?? "Vocabulary"
+                }
+                isRevealed={isMeaningRevealed}
+                onReveal={revealMeaning}
+              />
+            ) : (
+              <EmptyStateCard />
+            )}
           </div>
 
           <div className="hidden lg:block absolute right-0 top-2 translate-x-24 pointer-events-none">
@@ -111,9 +140,29 @@ export const ReviewApp = () => {
           <ActionButtons
             onReviewAgain={handleReviewAgain}
             onGotIt={handleGotIt}
+            disabled={disableActions}
           />
         </div>
       </div>
     </div>
   );
 };
+
+const CardSkeleton = () => (
+  <div className="rounded-[32px] border border-slate-200 bg-white/70 px-8 py-20 animate-pulse">
+    <div className="h-6 w-32 bg-slate-200 rounded-full mb-6" />
+    <div className="h-10 w-3/4 bg-slate-200 rounded-full mb-4" />
+    <div className="h-10 w-2/3 bg-slate-200 rounded-full mb-8" />
+    <div className="h-5 w-1/2 bg-slate-200 rounded-full mx-auto" />
+  </div>
+);
+
+const EmptyStateCard = () => (
+  <div className="rounded-[32px] border border-dashed border-slate-200 bg-white/80 px-10 py-16 text-center">
+    <p className="text-2xl font-semibold text-slate-800 mb-3">No words due</p>
+    <p className="text-slate-500">
+      Add more vocabulary from the extension or come back later for your next
+      review session.
+    </p>
+  </div>
+);
