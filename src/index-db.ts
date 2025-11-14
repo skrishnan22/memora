@@ -3,8 +3,8 @@ import { openDB, type DBSchema, type IDBPDatabase } from "idb";
 export const DB_NAME = "LexmoraDB";
 export const DB_VERSION = 1;
 export const STORE_NAME = "words";
-export const INDEX_TIMESTAMP = "timestamp";
 export const INDEX_IS_MASTERED = "isMastered";
+export const INDEX_NEXT_REVIEW = "nextReviewAt";
 
 const DEFAULT_EASE_FACTOR = 2.5;
 const DEFAULT_INTERVAL_DAYS = 0;
@@ -22,7 +22,6 @@ interface LexmoraDB extends DBSchema {
     key: string;
     value: {
       word: string;
-      timestamp: string;
       sourceUrl: string;
       meanings?: WordMeaning[];
       easeFactor: number;
@@ -34,8 +33,8 @@ interface LexmoraDB extends DBSchema {
       masteredAt?: string | null;
     };
     indexes: {
-      timestamp: string;
       isMastered: string;
+      nextReviewAt: string;
     };
   };
 }
@@ -50,8 +49,8 @@ export async function getDb() {
       async upgrade(db, oldVersion, _newVersion, transaction) {
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           const store = db.createObjectStore(STORE_NAME, { keyPath: "word" });
-          store.createIndex(INDEX_TIMESTAMP, "timestamp");
           store.createIndex(INDEX_IS_MASTERED, "isMastered");
+          store.createIndex(INDEX_NEXT_REVIEW, "nextReviewAt");
         }
 
         if (oldVersion < 2) {
@@ -89,7 +88,6 @@ export async function saveWord(
 ) {
   const db = await getDb();
   const normalized = word.toLowerCase().trim();
-  const nowIso = new Date().toISOString();
   const firstReviewDate = new Date(
     Date.now() + 24 * 60 * 60 * 1000
   ).toISOString();
@@ -101,7 +99,6 @@ export async function saveWord(
 
   const payload: WordEntry = {
     word: normalized,
-    timestamp: nowIso,
     sourceUrl: sourceUrl || "",
     ...(meanings?.length ? { meanings } : {}),
     easeFactor: DEFAULT_EASE_FACTOR,
@@ -155,19 +152,13 @@ export async function getReviewMetrics(): Promise<ReviewMetrics> {
 
 export async function getDueReviewWords(limit?: number): Promise<WordEntry[]> {
   const db = await getDb();
-  const words = await db.getAll(STORE_NAME);
   const nowIso = new Date().toISOString();
-  const getTime = (value?: string) => {
-    if (!value) {
-      return 0;
-    }
-    const time = new Date(value).getTime();
-    return Number.isNaN(time) ? 0 : time;
-  };
 
-  const dueWords = words
-    .filter((entry) => !entry.nextReviewAt || entry.nextReviewAt <= nowIso)
-    .sort((a, b) => getTime(a.nextReviewAt) - getTime(b.nextReviewAt));
+  const words = await db.getAllFromIndex(
+    STORE_NAME,
+    INDEX_NEXT_REVIEW,
+    IDBKeyRange.upperBound(nowIso)
+  );
 
-  return typeof limit === "number" ? dueWords.slice(0, limit) : dueWords;
+  return typeof limit === "number" ? words.slice(0, limit) : words;
 }
