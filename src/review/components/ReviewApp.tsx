@@ -7,10 +7,13 @@ import imageRight from "../../assets/vector-image-1.png";
 import lexmoraIcon from "../../assets/lexmora-icon.svg";
 import { useReviewMetrics } from "../hooks/useReviewMetrics";
 import { useReviewSession } from "../hooks/useReviewSession";
+import { SessionProgress } from "./SessionProgress";
 
 export const ReviewApp = () => {
   const { metrics, isLoading, error } = useReviewMetrics();
   const {
+    queue,
+    currentIndex,
     activeWord,
     isMeaningRevealed,
     isLoading: isSessionLoading,
@@ -19,6 +22,9 @@ export const ReviewApp = () => {
     goToNext,
   } = useReviewSession();
   const disableActions = isSessionLoading || !activeWord;
+  const totalWords = queue.length;
+  const completedWords = Math.min(currentIndex, totalWords);
+  const shouldShowProgress = totalWords > 0 || isSessionLoading;
 
   const handleReviewAgain = () => {
     console.log("Review again clicked");
@@ -101,11 +107,18 @@ export const ReviewApp = () => {
             />
           </div>
 
-          <div className="w-full max-w-4xl z-10">
+          <div className="w-full max-w-4xl z-10 flex flex-col gap-6">
             {sessionError ? (
               <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
                 {sessionError}
               </div>
+            ) : null}
+            {shouldShowProgress ? (
+              <SessionProgress
+                totalWords={totalWords}
+                completedWords={completedWords}
+                isLoading={isSessionLoading}
+              />
             ) : null}
             {isSessionLoading ? (
               <CardSkeleton />

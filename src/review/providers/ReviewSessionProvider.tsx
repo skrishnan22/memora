@@ -65,9 +65,10 @@ export const ReviewSessionProvider = ({
 
   const goToNext = useCallback(() => {
     setCurrentIndex((prev) => {
-      if (prev + 1 < queue.length) {
+      const nextIndex = Math.min(prev + 1, queue.length);
+      if (nextIndex !== prev) {
         setIsMeaningRevealed(false);
-        return prev + 1;
+        return nextIndex;
       }
       return prev;
     });
