@@ -1,7 +1,7 @@
 import { BookOpen, CheckCircle2, Eye, Flame } from "lucide-react";
 import { StatCard } from "./StatCard";
 import { VocabCard } from "./VocabCard";
-import { ActionButtons } from "./ActionButtons";
+import { ActionButtons, type ReviewResponse } from "./ActionButtons";
 import imageLeft from "../../assets/image.png";
 import imageRight from "../../assets/vector-image-1.png";
 import lexmoraIcon from "../../assets/lexmora-icon.svg";
@@ -26,13 +26,8 @@ export const ReviewApp = () => {
   const completedWords = Math.min(currentIndex, totalWords);
   const shouldShowProgress = totalWords > 0 || isSessionLoading;
 
-  const handleReviewAgain = () => {
-    console.log("Review again clicked");
-    goToNext();
-  };
-
-  const handleGotIt = () => {
-    console.log("Got it clicked");
+  const handleResponseSelect = (response: ReviewResponse) => {
+    console.log(`Response selected: ${response}`);
     goToNext();
   };
 
@@ -149,10 +144,9 @@ export const ReviewApp = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-center">
+        <div className="flex justify-center px-4">
           <ActionButtons
-            onReviewAgain={handleReviewAgain}
-            onGotIt={handleGotIt}
+            onSelectResponse={handleResponseSelect}
             disabled={disableActions}
           />
         </div>
