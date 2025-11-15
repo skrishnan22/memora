@@ -1,14 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getReviewMetrics, type ReviewMetrics } from "../../index-db";
 
-interface UseReviewMetricsResult {
-  metrics: ReviewMetrics | null;
-  isLoading: boolean;
-  error: string | null;
-  refresh: () => Promise<void>;
-}
-
-export const useReviewMetrics = (): UseReviewMetricsResult => {
+export const useReviewMetrics = () => {
   const [metrics, setMetrics] = useState<ReviewMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +21,7 @@ export const useReviewMetrics = (): UseReviewMetricsResult => {
   }, []);
 
   useEffect(() => {
-    void refresh();
+    refresh();
   }, [refresh]);
 
   return {
