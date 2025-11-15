@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { BookOpen, CheckCircle2, Eye, Flame } from "lucide-react";
 import { StatCard } from "./StatCard";
 import { VocabCard } from "./VocabCard";
@@ -8,6 +9,14 @@ import lexmoraIcon from "../../assets/lexmora-icon.svg";
 import { useReviewMetrics } from "../hooks/useReviewMetrics";
 import { useReviewSession } from "../hooks/useReviewSession";
 import { SessionProgress } from "./SessionProgress";
+import { applyReviewResponse } from "../../index-db";
+
+const responseQualityMap: Record<ReviewResponse, number> = {
+  slipped: 1,
+  patchy: 2,
+  onPoint: 4,
+  sharp: 5,
+};
 
 export const ReviewApp = () => {
   const { metrics, isLoading, error } = useReviewMetrics();
@@ -21,14 +30,34 @@ export const ReviewApp = () => {
     revealMeaning,
     goToNext,
   } = useReviewSession();
-  const disableActions = isSessionLoading || !activeWord;
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [isSavingResponse, setIsSavingResponse] = useState(false);
+  const disableActions =
+    isSessionLoading || !activeWord || isSavingResponse;
   const totalWords = queue.length;
   const completedWords = Math.min(currentIndex, totalWords);
   const shouldShowProgress = totalWords > 0 || isSessionLoading;
 
-  const handleResponseSelect = (response: ReviewResponse) => {
-    console.log(`Response selected: ${response}`);
-    goToNext();
+  const handleResponseSelect = async (response: ReviewResponse) => {
+    if (!activeWord) {
+      return;
+    }
+
+    setActionError(null);
+    setIsSavingResponse(true);
+
+    try {
+      const quality = responseQualityMap[response];
+      await applyReviewResponse(activeWord.word, quality);
+      goToNext();
+    } catch (err) {
+      console.error(err);
+      setActionError(
+        err instanceof Error ? err.message : "Unable to save response"
+      );
+    } finally {
+      setIsSavingResponse(false);
+    }
   };
 
   return (
@@ -144,11 +173,14 @@ export const ReviewApp = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-center px-4">
+        <div className="flex flex-col items-center gap-3 px-4">
           <ActionButtons
             onSelectResponse={handleResponseSelect}
             disabled={disableActions}
           />
+          {actionError ? (
+            <div className="text-sm text-red-600">{actionError}</div>
+          ) : null}
         </div>
       </div>
     </div>
