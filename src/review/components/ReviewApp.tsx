@@ -1,21 +1,63 @@
+import { useState } from "react";
 import { BookOpen, CheckCircle2, Eye, Flame } from "lucide-react";
 import { StatCard } from "./StatCard";
 import { VocabCard } from "./VocabCard";
-import { ActionButtons } from "./ActionButtons";
+import { ActionButtons, type ReviewResponse } from "./ActionButtons";
 import imageLeft from "../../assets/image.png";
 import imageRight from "../../assets/vector-image-1.png";
 import lexmoraIcon from "../../assets/lexmora-icon.svg";
 import { useReviewMetrics } from "../hooks/useReviewMetrics";
+import { useReviewSession } from "../hooks/useReviewSession";
+import { SessionProgress } from "./SessionProgress";
+import { applyReviewResponse } from "../../index-db";
+
+const responseQualityMap: Record<ReviewResponse, number> = {
+  slipped: 1,
+  patchy: 2,
+  onPoint: 4,
+  sharp: 5,
+};
 
 export const ReviewApp = () => {
   const { metrics, isLoading, error } = useReviewMetrics();
+  const {
+    queue,
+    currentIndex,
+    activeWord,
+    isMeaningRevealed,
+    isLoading: isSessionLoading,
+    error: sessionError,
+    revealMeaning,
+    goToNext,
+  } = useReviewSession();
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [isSavingResponse, setIsSavingResponse] = useState(false);
+  const disableActions =
+    isSessionLoading || !activeWord || isSavingResponse;
+  const totalWords = queue.length;
+  const completedWords = Math.min(currentIndex, totalWords);
+  const shouldShowProgress = totalWords > 0 || isSessionLoading;
 
-  const handleReviewAgain = () => {
-    console.log("Review again clicked");
-  };
+  const handleResponseSelect = async (response: ReviewResponse) => {
+    if (!activeWord) {
+      return;
+    }
 
-  const handleGotIt = () => {
-    console.log("Got it clicked");
+    setActionError(null);
+    setIsSavingResponse(true);
+
+    try {
+      const quality = responseQualityMap[response];
+      await applyReviewResponse(activeWord.word, quality);
+      goToNext();
+    } catch (err) {
+      console.error(err);
+      setActionError(
+        err instanceof Error ? err.message : "Unable to save response"
+      );
+    } finally {
+      setIsSavingResponse(false);
+    }
   };
 
   return (
@@ -89,12 +131,36 @@ export const ReviewApp = () => {
             />
           </div>
 
-          <div className="w-full max-w-4xl z-10">
-            <VocabCard
-              word="Ephemeral"
-              meaning="Lasting for a very short time; transitory"
-              category="Adjective"
-            />
+          <div className="w-full max-w-4xl z-10 flex flex-col gap-6">
+            {sessionError ? (
+              <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                {sessionError}
+              </div>
+            ) : null}
+            {shouldShowProgress ? (
+              <SessionProgress
+                totalWords={totalWords}
+                completedWords={completedWords}
+                isLoading={isSessionLoading}
+              />
+            ) : null}
+            {isSessionLoading ? (
+              <CardSkeleton />
+            ) : activeWord ? (
+              <VocabCard
+                word={activeWord.word}
+                meaning={
+                  activeWord.meanings?.[0]?.definition ?? "No meaning saved yet."
+                }
+                category={
+                  activeWord.meanings?.[0]?.partOfSpeech ?? "Vocabulary"
+                }
+                isRevealed={isMeaningRevealed}
+                onReveal={revealMeaning}
+              />
+            ) : (
+              <EmptyStateCard />
+            )}
           </div>
 
           <div className="hidden lg:block absolute right-0 top-2 translate-x-24 pointer-events-none">
@@ -107,13 +173,35 @@ export const ReviewApp = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-center">
+        <div className="flex flex-col items-center gap-3 px-4">
           <ActionButtons
-            onReviewAgain={handleReviewAgain}
-            onGotIt={handleGotIt}
+            onSelectResponse={handleResponseSelect}
+            disabled={disableActions}
           />
+          {actionError ? (
+            <div className="text-sm text-red-600">{actionError}</div>
+          ) : null}
         </div>
       </div>
     </div>
   );
 };
+
+const CardSkeleton = () => (
+  <div className="rounded-[32px] border border-slate-200 bg-white/70 px-8 py-20 animate-pulse">
+    <div className="h-6 w-32 bg-slate-200 rounded-full mb-6" />
+    <div className="h-10 w-3/4 bg-slate-200 rounded-full mb-4" />
+    <div className="h-10 w-2/3 bg-slate-200 rounded-full mb-8" />
+    <div className="h-5 w-1/2 bg-slate-200 rounded-full mx-auto" />
+  </div>
+);
+
+const EmptyStateCard = () => (
+  <div className="rounded-[32px] border border-dashed border-slate-200 bg-white/80 px-10 py-16 text-center">
+    <p className="text-2xl font-semibold text-slate-800 mb-3">No words due</p>
+    <p className="text-slate-500">
+      Add more vocabulary from the extension or come back later for your next
+      review session.
+    </p>
+  </div>
+);
