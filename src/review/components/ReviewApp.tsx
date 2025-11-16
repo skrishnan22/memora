@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BookOpen, CheckCircle2, Eye, Flame } from "lucide-react";
 import { StatCard } from "./StatCard";
 import { VocabCard } from "./VocabCard";
@@ -10,6 +10,7 @@ import { useReviewMetrics } from "../hooks/useReviewMetrics";
 import { useReviewSession } from "../hooks/useReviewSession";
 import { SessionProgress } from "./SessionProgress";
 import { applyReviewResponse } from "../../index-db";
+import { useCherryBlossomConfetti } from "../hooks/useCherryBlossomConfetti";
 
 const responseQualityMap: Record<ReviewResponse, number> = {
   slipped: 1,
@@ -32,11 +33,21 @@ export const ReviewApp = () => {
   } = useReviewSession();
   const [actionError, setActionError] = useState<string | null>(null);
   const [isSavingResponse, setIsSavingResponse] = useState(false);
-  const disableActions =
-    isSessionLoading || !activeWord || isSavingResponse;
+  const [hasCelebratedCompletion, setHasCelebratedCompletion] = useState(false);
+  const { fire: triggerConfetti } = useCherryBlossomConfetti();
+  const disableActions = isSessionLoading || !activeWord || isSavingResponse;
   const totalWords = queue.length;
   const completedWords = Math.min(currentIndex, totalWords);
   const shouldShowProgress = totalWords > 0 || isSessionLoading;
+  const isSessionComplete =
+    !isSessionLoading && totalWords > 0 && completedWords >= totalWords;
+
+  useEffect(() => {
+    if (isSessionComplete && !hasCelebratedCompletion) {
+      triggerConfetti();
+      setHasCelebratedCompletion(true);
+    }
+  }, [isSessionComplete, hasCelebratedCompletion, triggerConfetti]);
 
   const handleResponseSelect = async (response: ReviewResponse) => {
     if (!activeWord) {
@@ -72,7 +83,10 @@ export const ReviewApp = () => {
                 alt="Lexmora logo"
                 className="w-10 h-10 drop-shadow-sm"
               />
-              <span className="text-3xl sm:text-4xl font-semibold tracking-tight" style={{ color: "#16615b" }}>
+              <span
+                className="text-3xl sm:text-4xl font-semibold tracking-tight"
+                style={{ color: "#16615b" }}
+              >
                 Lexmora
               </span>
             </div>
@@ -150,7 +164,8 @@ export const ReviewApp = () => {
               <VocabCard
                 word={activeWord.word}
                 meaning={
-                  activeWord.meanings?.[0]?.definition ?? "No meaning saved yet."
+                  activeWord.meanings?.[0]?.definition ??
+                  "No meaning saved yet."
                 }
                 category={
                   activeWord.meanings?.[0]?.partOfSpeech ?? "Vocabulary"
