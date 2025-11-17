@@ -11,6 +11,7 @@ export type ReviewResponse = "slipped" | "patchy" | "onPoint" | "sharp";
 interface ActionButtonsProps {
   onSelectResponse: (response: ReviewResponse) => void;
   disabled?: boolean;
+  shortcutHints?: Partial<Record<ReviewResponse, string>>;
 }
 
 const responseOptions: Array<{
@@ -57,6 +58,7 @@ const responseOptions: Array<{
 export const ActionButtons = ({
   onSelectResponse,
   disabled = false,
+  shortcutHints,
 }: ActionButtonsProps) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full max-w-4xl">
@@ -71,9 +73,14 @@ export const ActionButtons = ({
               className,
             ].join(" ")}
           >
-            <div className="flex items-center gap-2 text-base font-semibold tracking-tight">
+            <div className="flex items-center gap-2 w-full text-base font-semibold tracking-tight">
               <Icon size={18} className="shrink-0" />
-              {label}
+              <span className="flex-1">{label}</span>
+              {shortcutHints?.[id] ? (
+                <span className="rounded-md bg-white/80 px-2 py-0.5 text-[11px] font-semibold leading-none tracking-wide text-current">
+                  {shortcutHints[id]}
+                </span>
+              ) : null}
             </div>
             <p className="text-xs text-slate-500">{description}</p>
           </button>

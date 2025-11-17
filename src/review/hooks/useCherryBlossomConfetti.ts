@@ -49,7 +49,7 @@ export const useCherryBlossomConfetti = () => {
         window.setTimeout(() => {
           confettiRef.current?.addConfettiAtPosition({
             emojis: BLOSSOM_EMOJIS,
-            emojiSize: 50,
+            emojiSize: 70,
             confettiNumber: 10,
             confettiRadius: 8,
             confettiDispatchPosition: {
