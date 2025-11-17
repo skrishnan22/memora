@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { BookOpen, CheckCircle2, Eye, Flame } from "lucide-react";
+import { motion } from "framer-motion";
 import { StatCard } from "./StatCard";
 import { VocabCard } from "./VocabCard";
 import { ActionButtons, type ReviewResponse } from "./ActionButtons";
@@ -12,12 +14,36 @@ import { SessionProgress } from "./SessionProgress";
 import { applyReviewResponse } from "../../index-db";
 import { useCherryBlossomConfetti } from "../hooks/useCherryBlossomConfetti";
 
+const celebrationMessages = [
+  "Word wizardry unlocked.\nYou just leveled up your lexicon.",
+  "Brain: buffed.\nThose words never saw you coming.",
+  "Linguistic muscles flexed.\nSee you at the next set.",
+  "Nice work.\nAnother handful of words now feel at home with you.",
+  "Well done.\nYour vocabulary just grew. Small step, real progress.",
+  "That was a good session.\nThose words are going to sit a little softer in your mind now.",
+];
+
 const responseQualityMap: Record<ReviewResponse, number> = {
   slipped: 1,
   patchy: 2,
   onPoint: 4,
   sharp: 5,
 };
+
+const responseShortcuts: Record<ReviewResponse, string> = {
+  slipped: "1",
+  patchy: "2",
+  onPoint: "3",
+  sharp: "4",
+} as const;
+const revealShortcut = "space";
+
+const shortcutToResponse = (
+  Object.keys(responseShortcuts) as ReviewResponse[]
+).reduce((acc, response) => {
+  acc[responseShortcuts[response].toLowerCase()] = response;
+  return acc;
+}, {} as Record<string, ReviewResponse>);
 
 export const ReviewApp = () => {
   const { metrics, isLoading, error } = useReviewMetrics();
@@ -34,6 +60,10 @@ export const ReviewApp = () => {
   const [actionError, setActionError] = useState<string | null>(null);
   const [isSavingResponse, setIsSavingResponse] = useState(false);
   const [hasCelebratedCompletion, setHasCelebratedCompletion] = useState(false);
+  const [isMascotCelebrating, setIsMascotCelebrating] = useState(false);
+  const [messageIndex, setMessageIndex] = useState(() =>
+    Math.floor(Math.random() * celebrationMessages.length)
+  );
   const { fire: triggerConfetti } = useCherryBlossomConfetti();
   const disableActions = isSessionLoading || !activeWord || isSavingResponse;
   const totalWords = queue.length;
@@ -45,31 +75,92 @@ export const ReviewApp = () => {
   useEffect(() => {
     if (isSessionComplete && !hasCelebratedCompletion) {
       triggerConfetti();
+      setIsMascotCelebrating(true);
+      setMessageIndex(Math.floor(Math.random() * celebrationMessages.length));
       setHasCelebratedCompletion(true);
     }
-  }, [isSessionComplete, hasCelebratedCompletion, triggerConfetti]);
+  }, [
+    isSessionComplete,
+    hasCelebratedCompletion,
+    triggerConfetti,
+    celebrationMessages.length,
+  ]);
 
-  const handleResponseSelect = async (response: ReviewResponse) => {
-    if (!activeWord) {
+  useEffect(() => {
+    if (!isMascotCelebrating) {
       return;
     }
+    const timeout = window.setTimeout(() => {
+      setIsMascotCelebrating(false);
+    }, 4000);
+    return () => window.clearTimeout(timeout);
+  }, [isMascotCelebrating]);
 
-    setActionError(null);
-    setIsSavingResponse(true);
+  const handleResponseSelect = useCallback(
+    async (response: ReviewResponse) => {
+      if (!activeWord) {
+        return;
+      }
 
-    try {
-      const quality = responseQualityMap[response];
-      await applyReviewResponse(activeWord.word, quality);
-      goToNext();
-    } catch (err) {
-      console.error(err);
-      setActionError(
-        err instanceof Error ? err.message : "Unable to save response"
-      );
-    } finally {
-      setIsSavingResponse(false);
-    }
-  };
+      setActionError(null);
+      setIsSavingResponse(true);
+
+      try {
+        const quality = responseQualityMap[response];
+        await applyReviewResponse(activeWord.word, quality);
+        goToNext();
+      } catch (err) {
+        console.error(err);
+        setActionError(
+          err instanceof Error ? err.message : "Unable to save response"
+        );
+      } finally {
+        setIsSavingResponse(false);
+      }
+    },
+    [activeWord, goToNext]
+  );
+
+  useHotkeys(
+    [...Object.values(responseShortcuts), revealShortcut].join(","),
+    (event) => {
+      if (disableActions || event.metaKey || event.ctrlKey || event.altKey) {
+        return;
+      }
+
+      const target = event.target as HTMLElement | null;
+      if (target) {
+        const tagName = target.tagName;
+        if (
+          tagName === "INPUT" ||
+          tagName === "TEXTAREA" ||
+          tagName === "SELECT" ||
+          tagName === "BUTTON" ||
+          target.isContentEditable
+        ) {
+          return;
+        }
+      }
+
+      const pressedKey = event.key.toLowerCase();
+
+      if (
+        !isMeaningRevealed &&
+        (event.code === "Space" || pressedKey === " " || pressedKey === "space")
+      ) {
+        revealMeaning();
+        return;
+      }
+
+      const response = shortcutToResponse[pressedKey];
+      if (!response) {
+        return;
+      }
+      handleResponseSelect(response);
+    },
+    { enabled: !disableActions, preventDefault: true },
+    [disableActions, handleResponseSelect, isMeaningRevealed, revealMeaning]
+  );
 
   return (
     <div className="min-h-screen relative flex flex-col items-center px-4 py-10 overflow-y-auto">
@@ -178,12 +269,68 @@ export const ReviewApp = () => {
             )}
           </div>
 
-          <div className="hidden lg:block absolute right-0 top-2 translate-x-24 pointer-events-none">
-            <img
+          <div className="hidden lg:block absolute inset-0 pointer-events-none">
+            <motion.img
               src={imageRight}
-              alt="Decorative illustration"
-              className="w-48 h-auto object-contain opacity-80"
+              alt="Lexmora mascot"
+              className="absolute w-56 h-auto object-contain opacity-95 drop-shadow-2xl"
+              style={{ zIndex: isMascotCelebrating ? 50 : 5 }}
+              initial={false}
+              animate={
+                isMascotCelebrating
+                  ? {
+                      left: "50%",
+                      right: "auto",
+                      top: "45%",
+                      x: "-50%",
+                      y: "-50%",
+                      scale: 3.6,
+                      rotate: -6,
+                    }
+                  : {
+                      left: "auto",
+                      right: "0",
+                      top: "0.5rem",
+                      x: "6rem",
+                      y: "0%",
+                      scale: 1,
+                      rotate: 0,
+                    }
+              }
+              transition={{
+                type: "spring",
+                stiffness: 150,
+                damping: 18,
+                mass: 0.9,
+              }}
             />
+            <motion.div
+              className="absolute rounded-[36px] bg-white px-8 py-5 shadow-xl text-lg font-semibold text-slate-900 whitespace-pre-line max-w-md leading-snug"
+              style={{
+                zIndex: isMascotCelebrating ? 50 : -10,
+                filter: "drop-shadow(0 10px 30px rgba(15,23,42,0.15))",
+              }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={
+                isMascotCelebrating
+                  ? {
+                      opacity: 1,
+                      scale: 1,
+                      left: "60%",
+                      top: "28%",
+                    }
+                  : { opacity: 0, scale: 0.8, left: "70%", top: "18%" }
+              }
+              transition={{
+                type: "spring",
+                stiffness: 200,
+                damping: 20,
+                mass: 0.6,
+              }}
+            >
+              {celebrationMessages[messageIndex]}
+              <span className="absolute -bottom-4 left-12 inline-block h-5 w-5 rotate-45 bg-white shadow-lg" />
+            </motion.div>
           </div>
         </div>
 
@@ -192,6 +339,7 @@ export const ReviewApp = () => {
           <ActionButtons
             onSelectResponse={handleResponseSelect}
             disabled={disableActions}
+            shortcutHints={responseShortcuts}
           />
           {actionError ? (
             <div className="text-sm text-red-600">{actionError}</div>
